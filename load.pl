@@ -1,0 +1,12 @@
+:- use_module(library(log4p)).
+:- use_module(server).
+
+:- use_module(library(plunit)).
+
+:- set_test_options([
+  run(make(all))
+  ]).
+
+:- load_test_files(_X).
+
+:- run_tests.
