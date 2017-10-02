@@ -45,7 +45,7 @@ log_level(info).
 log_handler(default_log_handler).
 
 default_log_handler(Level,Message) :-
-  writef('%t: %t\n',[Level, Message]),
+  writef('%w: %w\n',[Level, Message]),
   flush_output.
 
 set_log_level(NewLevel,OldLevel) :-
