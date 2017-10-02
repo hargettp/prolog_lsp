@@ -68,7 +68,6 @@ safe_handle_connection(Tag, Port, Socket, Peer) :-
     catch(
       handle_connection(Peer, StreamPair),
       exit,
-      % info('EOF: connection closed by peer: %w',[Peer])),
       info('Exiting connection from %w to %w on %w',[Peer,Tag,Port])),
     cleanup_connection(Tag, Port, Peer, StreamPair)).
 
@@ -82,14 +81,29 @@ setup_connection(Tag, Port, Socket, Peer, StreamPair) :-
 handle_connection(Peer,StreamPair) :-
   stream_pair(StreamPair,In,Out),
   read_message(In,Message),
-  handle_message(Peer,Out,Message,_Response),
+  handle_message(Peer,Out,Message),
   handle_connection(Peer,StreamPair).
 
-% handle_message(_,_,@end_of_file,_) :-
-%   thread_exit(eof).
+handle_message(Peer,Out,Message) :-
+  info('Received message from %w: %w',[Peer,Message]),
+  is_list(Message)
+    -> handle_batch(Peer, Out, Message)
+    ; handle_notification_or_request(Peer, Out, Message).
 
-handle_message(Peer,Out,Request,Response) :-
-  info('Received message from %w: %w',[Peer,Request]),
+handle_batch(Peer,Out,[Message|Rest]) :-
+  handle_notification_or_request(Peer, Out, Message),
+  handle_batch(Peer, Out, Rest).
+
+handle_batch(_, _ , []).
+
+handle_notification_or_request(Peer, Out, Message) :-
+  Message.get(id) = _Id
+    -> handle_request(Peer,Out,Message)
+    ; handle_notification(Peer,Out,Message).
+
+handle_notification(_Peer, _Out, _Request).
+
+handle_request(_Peer, Out, _Request) :-
   Response = ok,
   write_response(Out,Response).
 
