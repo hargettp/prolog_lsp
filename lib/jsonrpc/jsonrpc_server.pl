@@ -11,6 +11,8 @@
 :- use_module(library(log4p)).
 :- use_module(library(jsonrpc/jsonrpc_server)).
 
+:- dynamic jsonrpc_connection/4.
+
 start_jsonrpc_server(Tag,Port) :-
   \+recorded(jsonrpc_server(Tag,Port),_,_),
   thread_create(safe_run_server(Tag,Port),ServerThreadId,[]),
@@ -28,7 +30,7 @@ safe_run_server(Tag,Port) :-
   catch(
     setup_call_cleanup(
       setup_server(Port,Socket),
-      run_server(Port,Socket),
+      run_server(Tag,Port,Socket),
       cleanup_server(Tag,Port,Socket)
       ),
     Exception,
@@ -38,10 +40,10 @@ setup_server(Port,Socket) :-
   tcp_socket(Socket),
   tcp_bind(Socket, Port).
 
-run_server(Port,Socket) :-
+run_server(Tag,Port,Socket) :-
   tcp_listen(Socket, 5),
   tcp_open_socket(Socket, AcceptFd, _),
-  dispatch_connections(Port,AcceptFd).
+  dispatch_connections(Tag,Port,AcceptFd).
 
 % TODO if there are active connections from clients, they remain open
 % even though the server is shutting down
@@ -49,25 +51,32 @@ cleanup_server(Tag,Port,Socket) :-
   catch(
     tcp_close_socket(Socket),
     _,
-    info('Stopped JSON RPC server %w on %w',[Tag,Port])).
+    info('Stopped JSON RPC server %w on %w',[Tag,Port])),
+  findall(ConnectionThreadId,jsonrpc_connection(Tag,Port,_,ConnectionThreadId),ConnectionThreadIds),
+  forall(member(ThreadId,ConnectionThreadIds),thread_signal(ThreadId,throw(exit))).
 
-dispatch_connections(Port,Server) :-
+dispatch_connections(Tag,Port,Server) :-
   tcp_accept(Server, Client, Peer),
-  thread_create(safe_handle_connection(Port,Client, Peer), _,
+  thread_create(safe_handle_connection(Tag,Port,Client, Peer), _,
                 [ detached(true)
                 ]),
-  dispatch_connections(Port,Server).
+  dispatch_connections(Tag,Port,Server).
 
-safe_handle_connection(_Port,Socket, Peer) :-
+safe_handle_connection(Tag, Port, Socket, Peer) :-
   setup_call_cleanup(
-    setup_connection(Socket, StreamPair),
+    setup_connection(Tag, Port, Socket, Peer, StreamPair),
     catch(
       handle_connection(Peer, StreamPair),
-      eof,
-      info('EOF: connection closed by peer: %w',[Peer])),
-    cleanup_connection(Peer, StreamPair)).
+      exit,
+      % info('EOF: connection closed by peer: %w',[Peer])),
+      info('Exiting connection from %w to %w on %w',[Peer,Tag,Port])),
+    cleanup_connection(Tag, Port, Peer, StreamPair)).
 
-setup_connection(Socket, StreamPair) :-
+setup_connection(Tag, Port, Socket, Peer, StreamPair) :-
+  % Note there is still a chance of races, but this hopefully helps with cleanup of connections
+  thread_self(ThreadId),
+  \+ jsonrpc_connection(Tag, Port, Peer,ThreadId),
+  asserta(jsonrpc_connection(Tag, Port, Peer,ThreadId)),
   tcp_open_socket(Socket, StreamPair).
 
 handle_connection(Peer,StreamPair) :-
@@ -84,8 +93,10 @@ handle_message(Peer,Out,Request,Response) :-
   Response = ok,
   write_response(Out,Response).
 
-cleanup_connection(Peer, StreamPair) :-
+cleanup_connection(Tag, Port, Peer, StreamPair) :-
   close(StreamPair),
+  thread_self(ThreadId),
+  retractall(jsonrpc_connection(Tag, Port, Peer, ThreadId)),
   info('Closed connection to %w',[Peer]).
 
 read_message(In,Request) :-
