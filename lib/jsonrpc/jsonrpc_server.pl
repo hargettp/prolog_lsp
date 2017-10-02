@@ -32,7 +32,7 @@ safe_run_server(Tag,Port) :-
       cleanup_server(Tag,Port,Socket)
       ),
     Exception,
-    error('Exited JSON RPC server %s: %w',[Tag,Exception])).
+    warn('Exited JSON RPC server %w: %w',[Tag,Exception])).
 
 setup_server(Port,Socket) :-
   tcp_socket(Socket),
