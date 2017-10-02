@@ -1,6 +1,6 @@
 :- module(server,[
   start_language_server/1,
-  stop_language_server/0
+  stop_language_server/1
 
 ]).
 
@@ -14,5 +14,5 @@
 start_language_server(Port) :-
   start_jsonrpc_server(prolog_language_server,Port).
 
-stop_language_server :-
-  stop_jsonrpc_server(prolog_language_server).
+stop_language_server(Port) :-
+  stop_jsonrpc_server(prolog_language_server,Port).

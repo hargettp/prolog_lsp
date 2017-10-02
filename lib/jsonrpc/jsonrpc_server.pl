@@ -1,6 +1,6 @@
 :- module(jsonrpc_server,[
   start_jsonrpc_server/2,
-  stop_jsonrpc_server/1
+  stop_jsonrpc_server/2
 
 ]).
 
@@ -12,11 +12,12 @@
 :- use_module(library(jsonrpc/jsonrpc_server)).
 
 start_jsonrpc_server(Tag,Port) :-
+  \+recorded(jsonrpc_server(Tag,Port),_,_),
   thread_create(safe_run_server(Tag,Port),ServerThreadId,[]),
-  recorda(Tag,ServerThreadId).
+  recorda(jsonrpc_server(Tag,Port),ServerThreadId).
 
-stop_jsonrpc_server(Tag) :-
-  recorded(Tag,ServerThreadId,Reference),
+stop_jsonrpc_server(Tag,Port) :-
+  recorded(jsonrpc_server(Tag,Port),ServerThreadId,Reference),
   thread_signal(ServerThreadId,throw(exit)),
   thread_join(ServerThreadId,Status),
   info('JSON RPC server %s exited with %t',[Tag,Status]),
