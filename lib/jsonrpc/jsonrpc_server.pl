@@ -15,9 +15,10 @@
 :- use_module(library(jsonrpc/jsonrpc_server)).
 
 :- meta_predicate
-  method(:,:,?),
-  declared_method(?,:,?),
-  declared_method(?,?,:).
+  method(:,:,:),
+  declared_method(:,:,:),
+  error(:,:,:),
+  declared_error(:,:,:).
 
 :- dynamic jsonrpc_connection/4.
 
@@ -135,7 +136,7 @@ write_response(Out,Response) :-
 
 method(Server, Method, Module:Handler) :-
   Clause = declared_method(Server, Method, Module:Handler),
-  ( Clause ; asserta(Clause) ).
+  ( Clause ; assertz(Clause) ).
 
 dispatch_method(Server, Id, MethodName, Params, Response) :-
   atom_string(Method,MethodName),
@@ -144,10 +145,10 @@ dispatch_method(Server, Id, MethodName, Params, Response) :-
   apply(Module:Handler,[Result,Params]),
   Response = _{id: Id, result: Result }.
 
-:- dynamic declared_exception/3.
+:- dynamic declared_error/3.
 
 dispatch_exception(Server, Id, Exception, Response) :-
-  declared_exception(Server, Exception, Module:Handler),!,
+  declared_error(Server, Exception, Module:Handler),
   apply(Module:Handler, [Server, Exception, Error]),
   Response = _{id: Id, error: Error}.
 
@@ -155,14 +156,18 @@ dispatch_exception(Server, Id, Exception, Response) :-
 echo(Params,Params) :-
   info('Echoing %w', [Params]).
 
-declared_exception(_,unknown_method(_),jsonrpc_server:unknown_method).
+unknown_method(Server, unknown_method(Method),Error) :-
+  warn("Method not found for %w: %w",[Server, Method]),
+  Error = _{code: -32601, message: "Method not found", data: Method },!.
 
-declared_exception(_,_,jsonrpc_server:unknown_error).
-
-unknown_method(_Server, unknown_method(Method),Error) :-
-  swritef(Message, "Unknown method: %w",[Method]),
-  Error = _{code: -32601, message: Message },!.
+error(Server, Error, Module:Handler) :-
+  Clause = declared_error(Server, Error, Module:Handler),
+  ( Clause ; assertz(Clause) ).
 
 unknown_error(_Server, Exception, Error) :-
   error("An unknown error occurred: %t", [Exception]),
   Error = _{code: -32000, message: "An unknown error occurred" }, !.
+
+:- error(_,unknown_method(_),jsonrpc_server:unknown_method).
+
+:- error(_,_,jsonrpc_server:unknown_error).
