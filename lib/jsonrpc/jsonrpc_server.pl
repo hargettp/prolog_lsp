@@ -7,8 +7,10 @@
 
 ]).
 
+:- use_module(library(dcg/basics)).
 :- use_module(library(http/json)).
 :- use_module(library(http/json_convert)).
+:- use_module(library(readutil)).
 :- use_module(library(socket)).
 
 :- use_module(library(log4p)).
@@ -88,9 +90,50 @@ setup_connection(Server, Port, Socket, Peer, StreamPair) :-
 
 handle_connection(Server, Peer,StreamPair) :-
   stream_pair(StreamPair,In,Out),
-  read_message(In,Message),
+  read_header(In,Size),
+  read_message(In,Size,Message),
   handle_message(Server, Peer,Out,Message),
   handle_connection(Server, Peer,StreamPair).
+
+read_header(In, Size) :-
+  read_content_length(In,Size),
+  read_content_type(In),
+  read_blank_line(In).
+
+read_content_length(In,Size) :-
+  stream_property(In,position(Pos)),
+  read_line_to_codes(In,Codes),
+  ( phrase(content_length(Size),Codes,[]) ;
+    ( set_stream_position(In,Pos), Size = 0 )).
+
+read_content_type(In) :-
+  stream_property(In,position(Pos)),
+  read_line_to_codes(In,Codes),
+  ( phrase(content_type,Codes,[]) ;
+    ( set_stream_position(In,Pos), true )).
+
+read_blank_line(In) :-
+  read_line_to_codes(In,Codes),
+  phrase(blank_line,Codes,[]).
+
+content_length(Size) -->
+  "Content-Length",
+  whites,
+  ":",
+  whites,
+  digits(Digits),
+  { string_codes(String, Digits), number_string(Size,String)}.
+
+content_type -->
+  "Content-Type",
+  whites,
+  ":",
+  remainder(_).
+
+blank_line -->
+  whites.
+
+remainder(List,List,[]).
 
 handle_message(Server, Peer,Out,Message) :-
   is_list(Message)
@@ -124,8 +167,10 @@ cleanup_connection(Server, Port, Peer, StreamPair) :-
   retractall(jsonrpc_connection(Server, Port, Peer, ThreadId)),
   info('Closed connection to %w',[Peer]).
 
-read_message(In,Request) :-
-    json_read_dict(In,Request).
+read_message(In,Size,Request) :-
+    read_string(In,Size,String),
+    atom_string(Atom,String),
+    atom_json_dict(Atom,Request,[]).
 
 write_response(Out,Response) :-
   json_write(Out,Response),
