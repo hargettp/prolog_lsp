@@ -3,7 +3,8 @@
   stop_jsonrpc_server/2,
 
   method/3,
-  echo/2
+  echo/2,
+  crash/2
 
 ]).
 
@@ -93,7 +94,7 @@ handle_connection(Server, Peer,StreamPair) :-
   read_header(In,Size),
   ( read_message(In,Size,Message) ->
     handle_message(Server, Peer,Out,Message) ;
-    invalid_request(Out) ),
+    parse_error(Out) ),
   handle_connection(Server, Peer,StreamPair).
 
 read_header(In, Size) :-
@@ -202,6 +203,10 @@ dispatch_exception(Server, Id, Exception, Response) :-
 echo(Params,Params) :-
   info('Echoing %w', [Params]).
 
+crash(Params,Params) :-
+  warn("Intentionally crashing"),
+  throw(crash).
+
 unknown_method(Server, unknown_method(Method),Error) :-
   warn("Method not found for %w: %w",[Server, Method]),
   Error = _{code: -32601, message: "Method not found", data: Method },!.
@@ -214,8 +219,8 @@ unknown_error(_Server, Exception, Error) :-
   error("An unknown error occurred: %t", [Exception]),
   Error = _{code: -32000, message: "An unknown error occurred" }, !.
 
-invalid_request(Out) :-
-  Error = _{code: -32600, message: "Invalid Request" },
+parse_error(Out) :-
+  Error = _{code: -32700, message: "Parse error" },
   Response = _{error: Error},
   write_response(Out, Response).
 

@@ -1,3 +1,3 @@
-Content-Length: 47
+Content-Length: 66
 
-{ "id" : 1, "method": "missing", "params": [] }
+{ "jsonrpc" : "2.0", "id" : 1, "method": "missing", "params": [] }

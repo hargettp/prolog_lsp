@@ -1,4 +1,4 @@
-Content-Length: 44
+Content-Length: 63
 Content-Type: application/vscode-jsonrpc; charset=utf-8
 
-{ "id" : 1, "method": "echo", "params": [] }
+{ "jsonrpc" : "2.0", "id" : 1, "method": "echo", "params": [] }
