@@ -91,8 +91,9 @@ setup_connection(Server, Port, Socket, Peer, StreamPair) :-
 handle_connection(Server, Peer,StreamPair) :-
   stream_pair(StreamPair,In,Out),
   read_header(In,Size),
-  read_message(In,Size,Message),
-  handle_message(Server, Peer,Out,Message),
+  ( read_message(In,Size,Message) ->
+    handle_message(Server, Peer,Out,Message) ;
+    invalid_request(Out) ),
   handle_connection(Server, Peer,StreamPair).
 
 read_header(In, Size) :-
@@ -212,6 +213,11 @@ error(Server, Error, Module:Handler) :-
 unknown_error(_Server, Exception, Error) :-
   error("An unknown error occurred: %t", [Exception]),
   Error = _{code: -32000, message: "An unknown error occurred" }, !.
+
+invalid_request(Out) :-
+  Error = _{code: -32600, message: "Invalid Request" },
+  Response = _{error: Error},
+  write_response(Out, Response).
 
 :- error(_,unknown_method(_),jsonrpc_server:unknown_method).
 
