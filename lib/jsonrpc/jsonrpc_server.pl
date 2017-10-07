@@ -9,13 +9,11 @@
 ]).
 
 :- use_module(library(dcg/basics)).
-:- use_module(library(http/json)).
-:- use_module(library(http/json_convert)).
 :- use_module(library(readutil)).
 :- use_module(library(socket)).
 
 :- use_module(library(log4p)).
-:- use_module(library(jsonrpc/jsonrpc_server)).
+:- use_module(library(jsonrpc/jsonrpc_protocol)).
 
 :- meta_predicate
   method(:,:,:),
@@ -78,8 +76,8 @@ safe_handle_connection(Server, Port, Socket, Peer) :-
     setup_connection(Server, Port, Socket, Peer, StreamPair),
     catch(
       handle_connection(Server, Peer, StreamPair),
-      exit,
-      info('Exiting connection from %w to %w on %w',[Peer,Server,Port])),
+      eof,
+      info('Exiting: connection closed from %w to %w on %w',[Peer,Server,Port])),
     cleanup_connection(Server, Port, Peer, StreamPair)).
 
 setup_connection(Server, Port, Socket, Peer, StreamPair) :-
@@ -160,24 +158,14 @@ handle_request(Server, _Peer, Out, Request) :-
   catch(
       dispatch_method(Server, Request.id, Request.method, Request.params, Response),
       Exception,
-      dispatch_exception(Server,Request.id,Exception,Response)),
-  write_response(Out,Response).
+      dispatch_exception(Server,Request,Exception,Response)),
+  write_message(Out,Response).
 
 cleanup_connection(Server, Port, Peer, StreamPair) :-
   close(StreamPair),
   thread_self(ThreadId),
   retractall(jsonrpc_connection(Server, Port, Peer, ThreadId)),
   info('Closed connection to %w',[Peer]).
-
-read_message(In,Size,Request) :-
-    read_string(In,Size,String),
-    atom_string(Atom,String),
-    atom_json_dict(Atom,Request,[]).
-
-write_response(Out,Response) :-
-  json_write(Out,Response),
-  write(Out,'\n'),
-  flush_output(Out).
 
 :- dynamic declared_method/3.
 
@@ -194,10 +182,13 @@ dispatch_method(Server, Id, MethodName, Params, Response) :-
 
 :- dynamic declared_error/3.
 
-dispatch_exception(Server, Id, Exception, Response) :-
+dispatch_exception(Server, Message, Exception, Response) :-
   declared_error(Server, Exception, Module:Handler),
   apply(Module:Handler, [Server, Exception, Error]),
-  Response = _{id: Id, error: Error}.
+  BaseResponse = _{error: Error},
+  (Id = Message.get(id) ->
+    Response = BaseResponse.put(id,Id) ;
+    Response = BaseResponse).
 
 % simple method to echo parameters; good for testing
 echo(Params,Params) :-
@@ -222,7 +213,7 @@ unknown_error(_Server, Exception, Error) :-
 parse_error(Out) :-
   Error = _{code: -32700, message: "Parse error" },
   Response = _{error: Error},
-  write_response(Out, Response).
+  write_message(Out, Response).
 
 :- error(_,unknown_method(_),jsonrpc_server:unknown_method).
 
