@@ -2,7 +2,8 @@
   start_jsonrpc_server/2,
   stop_jsonrpc_server/2,
 
-  method/3,
+  server_method/3,
+  server_error/3,
   echo/2,
   crash/2
 
@@ -14,10 +15,10 @@
 :- use_module(library(jsonrpc/jsonrpc_protocol)).
 
 :- meta_predicate
-  method(:,:,:),
-  declared_method(:,:,:),
-  error(:,:,:),
-  declared_error(:,:,:).
+  server_method(:,:,:),
+  declared_server_method(:,:,:),
+  server_error(:,:,:),
+  declared_server_error(:,:,:).
 
 :- dynamic jsonrpc_connection/4.
 
@@ -131,23 +132,23 @@ cleanup_connection(Server, Port, Peer, StreamPair) :-
   retractall(jsonrpc_connection(Server, Port, Peer, ThreadId)),
   info('Closed connection to %w',[Peer]).
 
-:- dynamic declared_method/3.
+:- dynamic declared_server_method/3.
 
-method(Server, Method, Module:Handler) :-
-  Clause = declared_method(Server, Method, Module:Handler),
+server_method(Server, Method, Module:Handler) :-
+  Clause = declared_server_method(Server, Method, Module:Handler),
   ( Clause ; assertz(Clause) ).
 
 dispatch_method(Server, Id, MethodName, Params, Response) :-
   atom_string(Method,MethodName),
-  (declared_method(_MServer:Server, _MMethod:Method, Module:Handler) ;
+  (declared_server_method(_MServer:Server, _MMethod:Method, Module:Handler) ;
     throw(unknown_method(Method))),
   apply(Module:Handler,[Result,Params]),
   Response = _{id: Id, result: Result }.
 
-:- dynamic declared_error/3.
+:- dynamic declared_server_error/3.
 
 dispatch_exception(Server, Message, Exception, Response) :-
-  declared_error(Server, Exception, Module:Handler),
+  declared_server_error(Server, Exception, Module:Handler),
   apply(Module:Handler, [Server, Exception, Error]),
   BaseResponse = _{error: Error},
   (Id = Message.get(id) ->
@@ -166,8 +167,8 @@ unknown_method(Server, unknown_method(Method),Error) :-
   warn("Method not found for %w: %w",[Server, Method]),
   Error = _{code: -32601, message: "Method not found", data: Method },!.
 
-error(Server, Error, Module:Handler) :-
-  Clause = declared_error(Server, Error, Module:Handler),
+server_error(Server, Error, Module:Handler) :-
+  Clause = declared_server_error(Server, Error, Module:Handler),
   ( Clause ; assertz(Clause) ).
 
 unknown_error(_Server, Exception, Error) :-
@@ -184,6 +185,6 @@ invalid_request(Out) :-
   Response = _{error: Error},
   write_message(Out, Response).
 
-:- error(_,unknown_method(_),jsonrpc_server:unknown_method).
+:- server_error(_,unknown_method(_),jsonrpc_server:unknown_method).
 
-:- error(_,_,jsonrpc_server:unknown_error).
+:- server_error(_,_,jsonrpc_server:unknown_error).

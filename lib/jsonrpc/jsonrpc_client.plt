@@ -6,8 +6,8 @@
 
 :- use_module(library(log4p)).
 
-:- method(jsonrpc_client_test, echo, jsonrpc_server:echo).
-:- method(jsonrpc_client_test, crash, jsonrpc_server:crash).
+:- server_method(jsonrpc_client_test, echo, jsonrpc_server:echo).
+:- server_method(jsonrpc_client_test, crash, jsonrpc_server:crash).
 
 setup :-
   start_jsonrpc_server(jsonrpc_client_test,3401),
