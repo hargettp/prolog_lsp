@@ -37,10 +37,12 @@ debug(Message,Arguments) :- logf(debug,Message,Arguments).
 trace(Message,Arguments) :- logf(trace,Message,Arguments).
 
 :- dynamic log_level/1.
+:- thread_local log_level/1.
 
 log_level(info).
 
 :- dynamic log_handler/1.
+:- thread_local log_handler/1.
 
 log_handler(default_log_handler).
 
