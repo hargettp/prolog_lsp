@@ -8,8 +8,6 @@
 
 ]).
 
-:- use_module(library(dcg/basics)).
-:- use_module(library(readutil)).
 :- use_module(library(socket)).
 
 :- use_module(library(log4p)).
@@ -32,7 +30,7 @@ stop_jsonrpc_server(Server,Port) :-
   recorded(jsonrpc_server(Server,Port),ServerThreadId,Reference),
   thread_signal(ServerThreadId,throw(exit)),
   thread_join(ServerThreadId,Status),
-  info('JSON RPC server %s exited with %t',[Server,Status]),
+  info('JSON RPC server %t exited with %t',[Server,Status]),
   erase(Reference).
 
 safe_run_server(Server,Port) :-
@@ -48,6 +46,7 @@ safe_run_server(Server,Port) :-
 
 setup_server(Port,Socket) :-
   tcp_socket(Socket),
+  tcp_setopt(Socket,reuseaddr),
   tcp_bind(Socket, Port).
 
 run_server(Server,Port,Socket) :-
@@ -94,46 +93,6 @@ handle_connection(Server, Peer,StreamPair) :-
     handle_message(Server, Peer,Out,Message) ;
     parse_error(Out) ),
   handle_connection(Server, Peer,StreamPair).
-
-read_header(In, Size) :-
-  read_content_length(In,Size),
-  read_content_type(In),
-  read_blank_line(In).
-
-read_content_length(In,Size) :-
-  stream_property(In,position(Pos)),
-  read_line_to_codes(In,Codes),
-  ( phrase(content_length(Size),Codes,[]) ;
-    ( set_stream_position(In,Pos), Size = 0 )).
-
-read_content_type(In) :-
-  stream_property(In,position(Pos)),
-  read_line_to_codes(In,Codes),
-  ( phrase(content_type,Codes,[]) ;
-    ( set_stream_position(In,Pos), true )).
-
-read_blank_line(In) :-
-  read_line_to_codes(In,Codes),
-  phrase(blank_line,Codes,[]).
-
-content_length(Size) -->
-  "Content-Length",
-  whites,
-  ":",
-  whites,
-  digits(Digits),
-  { string_codes(String, Digits), number_string(Size,String)}.
-
-content_type -->
-  "Content-Type",
-  whites,
-  ":",
-  remainder(_).
-
-blank_line -->
-  whites.
-
-remainder(List,List,[]).
 
 handle_message(_, _Peer, Out, Message) :-
   Message.get(jsonrpc) = "2.0" ->
