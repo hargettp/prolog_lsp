@@ -117,7 +117,7 @@ handle_notification_or_request(Server, Peer, Out, Message) :-
     ; handle_notification(Server, Peer,Out,Message).
 
 handle_notification(Server, _Peer, _Out, Request) :-
-  dispatch_method(Server, Request.id, Request.method, Request.params, _Result).
+  dispatch_method(Server, Request.method, Request.params, _Result).
 
 handle_request(Server, _Peer, Out, Request) :-
   catch(
@@ -139,11 +139,19 @@ server_method(Server, Method, Module:Handler) :-
   ( Clause ; assertz(Clause) ).
 
 dispatch_method(Server, Id, MethodName, Params, Response) :-
-  atom_string(Method,MethodName),
-  (declared_server_method(_MServer:Server, _MMethod:Method, Module:Handler) ;
-    throw(unknown_method(Method))),
+  find_handler(Server, MethodName, Module:Handler),
   apply(Module:Handler,[Result,Params]),
   Response = _{id: Id, result: Result }.
+
+dispatch_method(Server, MethodName, Params, Response) :-
+  find_handler(Server, MethodName, Module:Handler),
+  apply(Module:Handler,[Result,Params]),
+  Response = _{result: Result }.
+
+find_handler(Server,MethodName, Module:Handler) :-
+  atom_string(Method,MethodName),
+  (declared_server_method(_MServer:Server, _MMethod:Method, Module:Handler) ;
+    throw(unknown_method(Method))).
 
 :- dynamic declared_server_error/3.
 

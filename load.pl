@@ -1,7 +1,8 @@
 :- use_module(library(log4p)).
 :- use_module(library(jsonrpc/jsonrpc_server)).
 :- use_module(library(jsonrpc/jsonrpc_client)).
-:- use_module(server).
+:- use_module(language_server).
+:- use_module(language_client).
 :- use_module(methods).
 
 :- use_module(library(plunit)).

@@ -1,4 +1,4 @@
-:- module(server,[
+:- module(language_server,[
   start_language_server/1,
   stop_language_server/1
 

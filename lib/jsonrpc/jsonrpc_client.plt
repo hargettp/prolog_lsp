@@ -10,7 +10,11 @@
 :- server_method(jsonrpc_client_test, crash, jsonrpc_server:crash).
 
 setup :-
-  start_jsonrpc_server(jsonrpc_client_test,3401),
+  catch(
+    start_jsonrpc_server(jsonrpc_client_test,3401),
+    Exception,
+    error("Could not start test server: %t",[Exception])
+    ),
   sleep(0.25).
 
 teardown :-
