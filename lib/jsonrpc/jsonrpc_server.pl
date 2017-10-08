@@ -135,6 +135,11 @@ blank_line -->
 
 remainder(List,List,[]).
 
+handle_message(_, _Peer, Out, Message) :-
+  Message.get(jsonrpc) = "2.0" ->
+    fail ;
+    invalid_request(Out).
+
 handle_message(Server, Peer,Out,Message) :-
   is_list(Message)
     -> handle_batch(Server, Peer, Out, Message)
@@ -212,6 +217,11 @@ unknown_error(_Server, Exception, Error) :-
 
 parse_error(Out) :-
   Error = _{code: -32700, message: "Parse error" },
+  Response = _{error: Error},
+  write_message(Out, Response).
+
+invalid_request(Out) :-
+  Error = _{code: -32600, message: "Invalid Request" },
   Response = _{error: Error},
   write_message(Out, Response).
 
