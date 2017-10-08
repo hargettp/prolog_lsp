@@ -37,12 +37,14 @@ debug(Message,Arguments) :- logf(debug,Message,Arguments).
 trace(Message,Arguments) :- logf(trace,Message,Arguments).
 
 :- dynamic log_level/1.
+:- thread_local level/1.
 
-log_level(info).
+thread_initialization(log_level(info)).
 
 :- dynamic log_handler/1.
+:- thread_local log_handler/1.
 
-log_handler(default_log_handler).
+thread_initialization(log_handler(default_log_handler)).
 
 default_log_handler(Level,Message) :-
   writef('%w: %w\n',[Level, Message]),
