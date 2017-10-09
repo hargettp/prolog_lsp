@@ -15,8 +15,14 @@ read_message(In,Size,Message) :-
     read_string(In,Size,String),
     (String = "" ->
       throw(eof) ;
-      ( atom_string(Atom,String),
-      atom_json_dict(Atom,Message,[])) ).
+      (
+        atom_string(Atom,String),
+        catch(
+          atom_json_dict(Atom,Message,[]),
+          error(syntax_error(json(illegal_json)),_),
+          fail
+          )
+      ) ).
 
 write_message(Out,Message) :-
   with_output_to(string(RawMessage),json_write(current_output,Message)),
@@ -63,5 +69,3 @@ content_type -->
 
 blank_line -->
   whites.
-
-remainder(List,List,[]).

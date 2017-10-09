@@ -4,8 +4,8 @@
 
 :- use_module(library(jsonrpc/jsonrpc_server)).
 
-% :- server_method(prolog_language_server, echo, jsonrpc_server:echo).
-% :- server_method(prolog_language_server, crash, jsonrpc_server:crash).
+:- server_method(prolog_language_server, echo, jsonrpc_server:echo).
+:- server_method(prolog_language_server, crash, jsonrpc_server:crash).
 
 :- server_method(prolog_language_server, initialize, pls_initialize).
 :- server_method(prolog_language_server, initialized, pls_initialized).
@@ -21,12 +21,12 @@ pls_initialized(_Result,_Params) :-
 pls_shutdown(Result) :-
   info("Method shutdown called"),
   % we don't actually shut anything down right now
-  Result = @null.
+  Result = null.
 
 pls_exit(Result) :-
   info("Method exit called"),
   % we don't actually exit anything down right now
-  Result = @null.
+  Result = null.
 
 
 % common data structures
