@@ -13,7 +13,10 @@
 pls_initialize(Result,Params) :-
   info("Method initialize called"),
   info("Client capabilities: %w",[Params]),
-  server_capabilities(Result).
+  server_capabilities(Capabilities),
+  Result = _{
+    capabilities: Capabilities
+    }.
 
 pls_initialized(_Result,_Params) :-
   info("Notification initialized called").
