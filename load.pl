@@ -4,6 +4,9 @@
 :- use_module(language_server).
 :- use_module(language_client).
 :- use_module(methods).
+:- use_module(files).
+:- use_module(workspace).
+:- use_module(code).
 
 :- use_module(library(plunit)).
 
