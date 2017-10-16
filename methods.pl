@@ -3,12 +3,18 @@
   ]).
 
 :- use_module(library(jsonrpc/jsonrpc_server)).
+:- use_module(code).
 
 :- server_method(prolog_language_server, echo, jsonrpc_server:echo).
 :- server_method(prolog_language_server, crash, jsonrpc_server:crash).
 
 :- server_method(prolog_language_server, initialize, pls_initialize).
 :- server_method(prolog_language_server, initialized, pls_initialized).
+
+:- server_method(prolog_language_server, shutdown, pls_shutdown).
+:- server_method(prolog_language_server, exit, pls_exit).
+
+:- server_method(prolog_language_server, 'workspace/symbol', pls_workspace_symbols).
 
 pls_initialize(Result,Params) :-
   info("Method initialize called"),
@@ -31,6 +37,8 @@ pls_exit(Result) :-
   % we don't actually exit anything down right now
   Result = null.
 
+pls_workspace_symbols(Symbols, Query) :-
+  workspace_symbols(Query, Symbols).
 
 % common data structures
 server_capabilities(Capabilities) :-

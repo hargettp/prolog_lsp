@@ -1,7 +1,13 @@
 :- module(workspace, [
   workspace_source_file/2,
   workspace_file/2,
-  workspace_file_type/2
+  workspace_file_type/2,
+
+  workspace_symbol/2,
+  workspace_symbols/2,
+
+  workspace_symbol_info/2,
+  workspace_symbol_infos/2
   ]).
 
 :- use_module(library(uri)).
@@ -38,3 +44,50 @@ workspace_file_type(doc,FileUri) :-
   member(Extension,[txt,md]),!.
 
 workspace_file_type(other,_).
+
+workspace_symbol(_Query,Symbol) :-
+  xref_defined(_,Callable,local(_)),
+  Callable =.. [Symbol|_].
+
+workspace_symbol_info(_Query,SymbolInfo) :-
+  xref_defined(File,Callable,local(StartLine)),
+  uri_file_name(FileUri,File),
+  Callable =.. [Symbol|_],
+  Start = _{line: StartLine, character: 0},
+  EndLine is StartLine + 1,
+  End = _{line: EndLine, character: 0},
+  Range = _{start: Start, end: End},
+  Location = {uri: FileUri, range: Range},
+  symbol_kind(function,Kind),
+  module_file(Module,File),
+  SymbolInfo = _{name: Symbol, kind: Kind,location: Location, container: Module}.
+
+workspace_symbol_infos(Query,SymbolInfos) :-
+  findall(SymbolInfo,workspace_symbol_info(Query,SymbolInfo),SymbolInfos).
+
+workspace_symbols(Query,Symbols) :-
+  findall(Symbol,workspace_symbol(Query,Symbol),RawSymbols),
+  sort(RawSymbols,Symbols).
+
+module_file(Module,File) :-
+  file_base_name(File,Name),
+  file_name_extension(Module,pl,Name).
+
+symbol_kind(file, 1).
+symbol_kind(module, 2).
+symbol_kind(namespace, 3).
+symbol_kind(package, 4).
+symbol_kind(class, 5).
+symbol_kind(method, 6).
+symbol_kind(property, 7).
+symbol_kind(field, 8).
+symbol_kind(constructor, 9).
+symbol_kind(enum, 10).
+symbol_kind(interface, 11).
+symbol_kind(function, 12).
+symbol_kind(variable, 13).
+symbol_kind(constant, 14).
+symbol_kind(string, 15).
+symbol_kind(number, 16).
+symbol_kind(boolean, 17).
+symbol_kind(array, 18).
