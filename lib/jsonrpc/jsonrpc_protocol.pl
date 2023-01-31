@@ -1,4 +1,4 @@
-:- module(json_protocol, [
+:- module(jsonrpc_protocol, [
   read_message/1,
   read_message/2,
 

@@ -2,12 +2,12 @@
 :- use_module(jsonrpc_protocol).
 :- use_module(library(http/json)).
 
-with_input_from(String, Goal) :-
+with_input_from(String, Module:Goal) :-
   setup_and_call_cleanup(
     open_string(String, In),
     setup_and_call_cleanup(
       ( current_input(SaveIn), set_input(In) ),
-      Goal, 
+      Module:Goal, 
       set_input(SaveIn)
       ),
     close(In)
