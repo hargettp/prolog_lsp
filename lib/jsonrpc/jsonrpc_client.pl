@@ -41,8 +41,7 @@ call_method(Connection, Method, Params, Result) :-
   uuid(Id),
   Request = _{jsonrpc: "2.0", id : Id, method: Method, params: Params},
   write_message(Out, Request),
-  read_header(In, Size),
-  read_message(In, Size, Response),
+  read_message(In, Response),
   ( _ = Response.get(result) ->
     Result = Response.result ;
     throw(jsonrpc_error(Response.error)) ),

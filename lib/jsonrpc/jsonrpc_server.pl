@@ -90,8 +90,7 @@ setup_connection(Server, Port, Socket, Peer, StreamPair) :-
 
 handle_connection(Server, Peer,StreamPair) :-
   stream_pair(StreamPair,In,Out),
-  read_header(In,Size),
-  ( read_message(In,Size,Message) ->
+  ( read_message(In, Message) ->
     handle_message(Server, Peer,Out,Message) ;
     parse_error(Out) ),
   handle_connection(Server, Peer,StreamPair).

@@ -2,6 +2,7 @@
 
   ]).
 
+:- use_module(library(log4p).
 :- use_module(library(jsonrpc/jsonrpc_server)).
 :- use_module(code).
 
