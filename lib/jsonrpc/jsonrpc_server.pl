@@ -1,5 +1,6 @@
 :- module(jsonrpc_server,[
   start_jsonrpc_server/2,
+  run_jsonrpc_server/3,
   stop_jsonrpc_server/2,
 
   server_method/3,
@@ -24,7 +25,7 @@
 
 start_jsonrpc_server(Server,Port) :-
   \+recorded(jsonrpc_server(Server,Port),_,_),
-  thread_create(safe_run_server(Server,Port),ServerThreadId,[]),
+  thread_create(safe_run_jsonrpc_server(Server,Port),ServerThreadId,[]),
   recorda(jsonrpc_server(Server,Port),ServerThreadId).
 
 stop_jsonrpc_server(Server,Port) :-
@@ -34,12 +35,12 @@ stop_jsonrpc_server(Server,Port) :-
   info('JSON RPC server %t exited with %t',[Server,Status]),
   erase(Reference).
 
-safe_run_server(Server,Port) :-
+safe_run_jsonrpc_server(Server,Port) :-
   info('Started JSON RPC server %w on %w',[Server,Port]),
   catch(
     setup_call_cleanup(
       setup_server(Port,Socket),
-      run_server(Server,Port,Socket),
+      run_jsonrpc_server(Server,Port,Socket),
       cleanup_server(Server,Port,Socket)
       ),
     Exception,
@@ -50,7 +51,7 @@ setup_server(Port,Socket) :-
   tcp_setopt(Socket,reuseaddr),
   tcp_bind(Socket, Port).
 
-run_server(Server,Port,Socket) :-
+run_jsonrpc_server(Server,Port,Socket) :-
   tcp_listen(Socket, 5),
   tcp_open_socket(Socket, AcceptFd, _),
   dispatch_connections(Server,Port,AcceptFd).

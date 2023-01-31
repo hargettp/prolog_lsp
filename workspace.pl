@@ -38,11 +38,6 @@ workspace_file_type(doc,FileUri) :-
   file_name_extension(_Base,Extension,File),
   member(Extension,[txt,md]),!.
 
-workspace_file_type(doc,FileUri) :-
-  uri_file_name(FileUri,File),
-  file_name_extension(_Base,Extension,File),
-  member(Extension,[txt,md]),!.
-
 workspace_file_type(other,_).
 
 workspace_symbol(_Query,Symbol) :-
@@ -53,14 +48,21 @@ workspace_symbol_info(_Query,SymbolInfo) :-
   xref_defined(File,Callable,local(StartLine)),
   uri_file_name(FileUri,File),
   Callable =.. [Symbol|_],
-  Start = _{line: StartLine, character: 0},
   EndLine is StartLine + 1,
-  End = _{line: EndLine, character: 0},
-  Range = _{start: Start, end: End},
-  Location = {uri: FileUri, range: Range},
   symbol_kind(function,Kind),
   module_file(Module,File),
-  SymbolInfo = _{name: Symbol, kind: Kind,location: Location, container: Module}.
+  SymbolInfo = symbol_info{
+    name: Symbol,
+    kind: Kind,
+    location: {
+      uri: FileUri,
+      range: range{
+        start: position{line: StartLine, character: 0},
+        end: position{line: EndLine, character: 0}
+        }
+      },
+    container: Module
+    }.
 
 workspace_symbol_infos(Query,SymbolInfos) :-
   findall(SymbolInfo,workspace_symbol_info(Query,SymbolInfo),SymbolInfos).
