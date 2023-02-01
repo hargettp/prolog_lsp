@@ -8,7 +8,7 @@
   exit/1
   ]).
 
-:- use_module(library(jsonrpc/jsonrpc_client)).
+:- use_module(lib(jsonrpc/jsonrpc_client)).
 
 with_language(ServerAddress, Connection, Goal) :-
   with_connection(ServerAddress, Connection, Goal).

@@ -1,13 +1,13 @@
-% user:file_search_path(library, './lib')
+user:file_search_path(lib, './lib')
 
 :- use_module(library(log4p)).
 
 % Let's reconfigure logging to use stderr
-:- use_stderr_log_handler.
+:- initialization(use_stderr_log_handler).
 
-:- use_module(library(jsonrpc/jsonrpc_protocol)).
-:- use_module(library(jsonrpc/jsonrpc_server)).
-:- use_module(library(jsonrpc/jsonrpc_client)).
+:- use_module(lib(jsonrpc/jsonrpc_protocol)).
+:- use_module(lib(jsonrpc/jsonrpc_server)).
+:- use_module(lib(jsonrpc/jsonrpc_client)).
 :- use_module(language_server).
 :- use_module(language_client).
 :- use_module(methods).

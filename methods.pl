@@ -3,7 +3,7 @@
   ]).
 
 :- use_module(library(log4p)).
-:- use_module(library(jsonrpc/jsonrpc_server)).
+:- use_module(lib(jsonrpc/jsonrpc_server)).
 :- use_module(code).
 
 :- server_method(prolog_language_server, echo, jsonrpc_server:echo).

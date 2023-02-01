@@ -13,7 +13,7 @@
 :- use_module(library(socket)).
 
 :- use_module(library(log4p)).
-:- use_module(library(jsonrpc/jsonrpc_protocol)).
+:- use_module('./jsonrpc_protocol').
 
 :- meta_predicate
   server_method(:,:,:),
