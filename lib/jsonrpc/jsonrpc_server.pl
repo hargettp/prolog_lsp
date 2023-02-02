@@ -21,19 +21,33 @@
   server_error(:,:,:),
   declared_server_error(:,:,:).
 
+% jsonrpc_server(Server, Port, ServerThreadId)
+:- dynamic jsonrpc_server/3.
+
+% jsonrpc_connection(Server, Port, Peer, ServerThreadId)
 :- dynamic jsonrpc_connection/4.
 
+start_jsonrpc_server(Server, _) :-
+  jsonrpc_server(Server, _, _),
+  throw(error(server_already_started)).
+
+start_jsonrpc_server(_, Port) :-
+  jsonrpc_server(_, Port, _),
+  throw(error(server_already_on_port)).
+
 start_jsonrpc_server(Server,Port) :-
-  \+recorded(jsonrpc_server(Server,Port),_,_),
   thread_create(safe_run_jsonrpc_server(Server,Port),ServerThreadId,[]),
-  recorda(jsonrpc_server(Server,Port),ServerThreadId).
+  assertz(jsonrpc_server(Server,Port,ServerThreadId)).
 
 stop_jsonrpc_server(Server,Port) :-
-  recorded(jsonrpc_server(Server,Port),ServerThreadId,Reference),
+  jsonrpc_server(Server,Port,ServerThreadId),
   thread_signal(ServerThreadId,throw(exit)),
   thread_join(ServerThreadId,Status),
   info('JSON RPC server %t exited with %t',[Server,Status]),
-  erase(Reference).
+  retractall(jsonrpc_server(Server, Port, ServerThreadId)).
+
+stop_jsonrpc_server(_, _) :-
+  throw(error(server_not_started)).
 
 safe_run_jsonrpc_server(Server,Port) :-
   info('Started JSON RPC server %w on %w',[Server,Port]),
@@ -82,9 +96,10 @@ safe_handle_connection(Server, Port, Socket, Peer) :-
     cleanup_connection(Server, Port, Peer, StreamPair)).
 
 setup_connection(Server, Port, Socket, Peer, StreamPair) :-
-  % Note there is still a chance of races, but this hopefully helps with cleanup of connections
   thread_self(ThreadId),
-  \+ jsonrpc_connection(Server, Port, Peer,ThreadId),
+  \+ jsonrpc_connection(Server, Port, Peer, ThreadId),
+  % Note there is still a chance of races, but this hopefully helps with cleanup 
+  % of connections; deliberately using asserta here
   asserta(jsonrpc_connection(Server, Port, Peer,ThreadId)),
   tcp_open_socket(Socket, StreamPair).
 
