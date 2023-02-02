@@ -1,8 +1,30 @@
 :- module(jsonrpc_connectors, [
-  start_connector/1,
-  stop_connector/1
+  connect_to_server/2,
+  close_connection/1,
+  serve_messages/1
   ]
 ).
 
-:- dynamic start_connector/1.
-:- dynamic stop_connector/1.
+% 
+% Connectors
+% 
+:- reexport(connectors/stdio).
+:- reexport(connectors/tcp).
+
+% 
+% Client methods
+% 
+
+% connect_to_server(Server, Connection)
+:- multifile connect_to_server/2.
+
+% close_connection(Connnection)
+:- multifile close_connection/1.
+
+% 
+% Server methods
+% 
+
+% launch_server(Server)
+:- multifile serve_messages/1.
+

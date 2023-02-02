@@ -1,6 +1,6 @@
 :- module(language_server,[
-  start_language_server/1,
-  stop_language_server/1
+
+  run_language_server/0
 
 ]).
 
@@ -9,10 +9,11 @@
 :- use_module(library(socket)).
 
 :- use_module(library(log4p)).
-:- use_module(lib(jsonrpc/jsonrpc_server)).
+:- use_module(lib(jsonrpc/connectors)).
 
-start_language_server(Port) :-
-  start_jsonrpc_server(prolog_language_server,Port).
+run_language_server :-
+  create_stdio_server(prolog, Server),
+  serve_messages(Server).
 
-stop_language_server(Port) :-
-  stop_jsonrpc_server(prolog_language_server,Port).
+% stop_language_server(Port) :-
+%   stop_jsonrpc_server(prolog_language_server,Port).
