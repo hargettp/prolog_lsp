@@ -25,6 +25,6 @@
 % Server methods
 % 
 
-% launch_server(Server)
+% serve_messages(Server)
 :- multifile serve_messages/1.
 

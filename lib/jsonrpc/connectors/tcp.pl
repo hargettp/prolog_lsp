@@ -1,5 +1,5 @@
 :- module(jsonrpc_connectors_tcp,[
-  create_tcp_server/3,
+  create_tcp_connector/3,
   start_jsonrpc_server/2,
   run_jsonrpc_server/3,
   stop_jsonrpc_server/2
@@ -9,7 +9,24 @@
 :- use_module(library(log4p)).
 :- use_module('../jsonrpc_server').
 
-create_tcp_server(ServerName, Port, tcp_server(ServerName, Port)).
+% 
+% Client methods
+% 
+
+% connect_to_server(Server, Connection)
+connect_to_server(ServerAddress, Connection) :-
+  tcp_connect(ServerAddress,StreamPair,[]),
+  Connection = connection(ServerAddress,StreamPair).
+
+% close_connection(Connnection)
+close_connection(connection(_,StreamPair)) :-
+  ignore(close(StreamPair)).
+
+% 
+% Server methods
+% 
+
+create_tcp_connector(ServerName, Port, tcp_server(ServerName, Port)).
 
 serve_messages(tcp_server(ServerName, Port)) :-
   safe_run_jsonrpc_server(ServerName, Port).
@@ -29,7 +46,7 @@ start_jsonrpc_server(_, Port) :-
   throw(error(server_already_on_port)).
 
 start_jsonrpc_server(ServerName,Port) :-
-  create_tcp_server(ServerName, Port, Server),
+  create_tcp_connector(ServerName, Port, Server),
   thread_create(serve_messages(Server), ServerThreadId,[]),
   assertz(jsonrpc_server(ServerName,Port,ServerThreadId)).
 

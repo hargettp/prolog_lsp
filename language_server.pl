@@ -12,7 +12,7 @@
 :- use_module(lib(jsonrpc/connectors)).
 
 run_language_server :-
-  create_stdio_server(prolog, Server),
+  create_stdio_connector(prolog, Server),
   serve_messages(Server).
 
 % stop_language_server(Port) :-
