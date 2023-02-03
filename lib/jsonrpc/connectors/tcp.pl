@@ -1,5 +1,5 @@
 :- module(jsonrpc_connectors_tcp,[
-  create_tcp_connector/3,
+  create_tcp_server/3,
   start_jsonrpc_server/2,
   run_jsonrpc_server/3,
   stop_jsonrpc_server/2
@@ -14,21 +14,21 @@
 % 
 
 % connect_to_server(Server, Connection)
-connect_to_server(ServerAddress, Connection) :-
+jsonrpc_connectors:connect_to_server(ServerAddress, Connection) :-
   tcp_connect(ServerAddress,StreamPair,[]),
   Connection = connection(ServerAddress,StreamPair).
 
 % close_connection(Connnection)
-close_connection(connection(_,StreamPair)) :-
+jsonrpc_connectors:close_connection(connection(_,StreamPair)) :-
   ignore(close(StreamPair)).
 
 % 
 % Server methods
 % 
 
-create_tcp_connector(ServerName, Port, tcp_server(ServerName, Port)).
+create_tcp_server(ServerName, Port, tcp_server(ServerName, Port)).
 
-serve_messages(tcp_server(ServerName, Port)) :-
+jsonrpc_connectors:serve_messages(tcp_server(ServerName, Port)) :-
   safe_run_jsonrpc_server(ServerName, Port).
 
 % jsonrpc_server(Server, Port, ServerThreadId)
@@ -46,8 +46,8 @@ start_jsonrpc_server(_, Port) :-
   throw(error(server_already_on_port)).
 
 start_jsonrpc_server(ServerName,Port) :-
-  create_tcp_connector(ServerName, Port, Server),
-  thread_create(serve_messages(Server), ServerThreadId,[]),
+  create_tcp_server(ServerName, Port, Server),
+  thread_create(jsonrpc_connectors:serve_messages(Server), ServerThreadId,[]),
   assertz(jsonrpc_server(ServerName,Port,ServerThreadId)).
 
 stop_jsonrpc_server(ServerName,Port) :-
@@ -92,6 +92,7 @@ cleanup_server(ServerName,Port,Socket) :-
 
 dispatch_connections(ServerName,Port,ServerFd) :-
   tcp_accept(ServerFd, Client, Peer),
+  info('accepted connection on ~w for ~w',[Port, Client]),
   thread_create(safe_handle_connection(ServerName,Port,Client, Peer), _,
                 [ detached(true),
                   debug(false)

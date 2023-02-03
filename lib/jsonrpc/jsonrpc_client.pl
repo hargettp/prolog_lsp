@@ -14,15 +14,15 @@
 :- use_module('./jsonrpc_protocol').
 :- use_module('./connectors').
 
-jsonrpc_connect(Connector,Connection) :-
-  connect_to_server(Connector, Connection).
+jsonrpc_connect(ServerInfo,Connection) :-
+  connect_to_server(ServerInfo, Connection).
 
 jsonrpc_disconnect(Connection) :-
   close_connection(Connection).
 
-with_connection(ServerAddress,Connection,Goal) :-
+with_connection(ServerInfo,Connection,Goal) :-
   setup_call_cleanup(
-    jsonrpc_connect(ServerAddress,Connection),
+    jsonrpc_connect(ServerInfo,Connection),
     Goal,
     jsonrpc_disconnect(Connection)
     ).

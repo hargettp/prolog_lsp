@@ -1,5 +1,5 @@
 :- module(jsonrpc_connectors_stdio,[
-  create_stdio_connector/2
+  create_stdio_server/2
   ]).
 
 :- use_module('../jsonrpc_server').
@@ -8,7 +8,7 @@
 % Client methods
 % 
 
-connect_to_server(stdio(Program, Args), stdio_connection(ChildPID, StreamPair)) :-
+jsonrpc_connectors:connect_to_server(stdio(Program, Args), stdio_connection(ChildPID, StreamPair)) :-
   process_create(
     Program, 
     Args, 
@@ -21,7 +21,7 @@ connect_to_server(stdio(Program, Args), stdio_connection(ChildPID, StreamPair)) 
     ),
   stream_pair(StreamPair, ConnectionIn, ConnectionOut).
 
-close_connection(stdio_connection(ChildPID, StreamPair)) :-
+jsonrpc_connectors:close_connection(stdio_connection(ChildPID, StreamPair)) :-
   ignore(close(StreamPair)),
   process_kill(ChildPID, quit),
   process_wait(ChildPID, Status, [timeout(0)]),
@@ -37,12 +37,12 @@ close_connection(stdio_connection(ChildPID, StreamPair)) :-
 % Server methods
 % 
 
-create_stdio_connector(ServerName, stdio_server(ServerName, StreamPair)) :-
+create_stdio_server(ServerName, stdio_server(ServerName, StreamPair)) :-
   current_input(In),
   current_output(Out),
   stream_pair(StreamPair, In, Out).
 
-serve_messages(stdio_server(ServerName, StreamPair)) :-
+jsonrpc_connectors:serve_messages(stdio_server(ServerName, StreamPair)) :-
   handle_connection(ServerName, stdio, StreamPair).
 
   

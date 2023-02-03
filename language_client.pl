@@ -9,8 +9,8 @@
 
 :- use_module(lib(jsonrpc/jsonrpc_client)).
 
-with_language(Connector, Connection, Goal) :-
-  with_connection(Connector, Connection, Goal).
+with_language(ServerInfo, Connection, Goal) :-
+  with_connection(ServerInfo, Connection, Goal).
 
 initialize(Connection,Result) :-
   call_method(Connection,initialize,[],Result).
