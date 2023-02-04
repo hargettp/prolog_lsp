@@ -21,10 +21,18 @@ read_message(In, Message) :-
     ).
     
 read_message(Message) :-
-  read_header(Size),
-  read_blank_line,
-  read_content(Size, Content),
-  atom_json_dict(Content, Message, []).
+  % Note: not requiring that the jsonrpc key be present
+  % with value 2.0
+  catch(
+    (
+      read_header(Size),
+      read_blank_line,
+      read_content(Size, Content),
+      atom_json_dict(Content, Message, [])
+      ),
+    error(syntax_error(json(illegal_json)),_),
+    fail
+    ).
 
 write_message(Out,Message) :-
   with_output_to(Out,write_message(Message)).
@@ -34,7 +42,8 @@ write_message(Message) :-
   string_length(Content, Size),
   write_content_length(Size),
   write_blank_line,
-  write_content(Content).
+  write_content(Content),
+  flush_output.
   
 read_blank_line(In) :-
   read_line_to_codes(In,Codes),
@@ -44,8 +53,8 @@ try_read_from(In, Goal) :-
   stream_property(In, position(Pos)), 
   catch(
     ( Goal -> true ; set_stream_position(In, Pos) ),
-    _Any,
-    set_stream_position(In, Pos)
+    Any,
+    ( set_stream_position(In, Pos), throw(Any) )
     ).
 
 try_read(Goal) :-
@@ -111,7 +120,7 @@ read_blank_line :-
   current_input(In),
   try_read_from(
     In,
-    read_line_to_string(In, "")
+    read_string(In, 2, "\r\n")
     ).
 
 write_blank_line :-

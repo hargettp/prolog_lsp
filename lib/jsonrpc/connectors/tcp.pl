@@ -47,7 +47,7 @@ start_jsonrpc_server(_, Port) :-
 
 start_jsonrpc_server(ServerName,Port) :-
   create_tcp_server(ServerName, Port, Server),
-  thread_create(jsonrpc_connectors:serve_messages(Server), ServerThreadId,[]),
+  thread_create(jsonrpc_connectors:serve_messages(Server), ServerThreadId,[detched(true)]),
   assertz(jsonrpc_server(ServerName,Port,ServerThreadId)).
 
 stop_jsonrpc_server(ServerName,Port) :-
@@ -93,13 +93,11 @@ cleanup_server(ServerName,Port,Socket) :-
 dispatch_connections(ServerName,Port,ServerFd) :-
   tcp_accept(ServerFd, Client, Peer),
   info('accepted connection on ~w for ~w',[Port, Client]),
-  thread_create(safe_handle_connection(ServerName,Port,Client, Peer), _,
-                [ detached(true),
-                  debug(false)
-                ]),
+  thread_create(safe_handle_connection(ServerName,Port,Client, Peer), _, [detched(true)]),
   dispatch_connections(ServerName,Port,ServerFd).
 
 safe_handle_connection(ServerName, Port, Socket, Peer) :-
+  debug('handling connection from ~w on ~w', [Peer, Port]),
   setup_call_cleanup(
     setup_connection(ServerName, Port, Socket, Peer, StreamPair),
     catch(
@@ -114,6 +112,7 @@ setup_connection(ServerName, Port, Socket, Peer, StreamPair) :-
   % Note there is still a chance of races, but this hopefully helps with cleanup 
   % of connections; deliberately using asserta here
   asserta(jsonrpc_connection(ServerName, Port, Peer,ThreadId)),
+  info('Setup connection on ~w for ~w', [Port, Peer]),
   tcp_open_socket(Socket, StreamPair).
 
 cleanup_connection(ServerName, Port, Peer, StreamPair) :-

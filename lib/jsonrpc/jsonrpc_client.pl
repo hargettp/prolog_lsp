@@ -33,7 +33,10 @@ call_method(Connection, Method, Params, Result) :-
   uuid(Id),
   Request = _{jsonrpc: "2.0", id : Id, method: Method, params: Params},
   write_message(Out, Request),
+  debug('Sent request: ~w',[Request]),
+  flush_output(Out),
   read_message(In, Response),
+  debug('Received response: ~w', [Response]),
   ( _ = Response.get(result) ->
     Result = Response.result ;
     throw(jsonrpc_error(Response.error)) ),
