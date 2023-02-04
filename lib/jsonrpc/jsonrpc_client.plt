@@ -52,13 +52,12 @@ test(parse_error,[setup(setup(Connection)),cleanup(teardown(Connection))]) :-
     (Error.code = -32700, Error.message = "Parse error")
     ).
 
-% Not testing for this at this time -- choosing to stay flexible
-% test(invalid_request,[setup(setup(Connection)),cleanup(teardown(Connection))]) :-
-%   catch(
-%     call_invalid_request(Connection),
-%     jsonrpc_error(Error),
-%     (Error.code = -32600, Error.message = "Invalid Request")
-%     ).
+test(invalid_request,[setup(setup(Connection)),cleanup(teardown(Connection))]) :-
+  catch(
+    call_invalid_request(Connection),
+    jsonrpc_error(Error),
+    (Error.code = -32600, Error.message = "Invalid Request")
+    ).
 
 call_parse_error(Connection) :-
   RawMessage = '{ "jsonrpc" : "2.0", "id" : 1, "method", "echo", "params": [] }',
