@@ -26,18 +26,18 @@
 :- dynamic jsonrpc_connection/4.
 
 handle_connection(Server, Peer, StreamPair) :-
-  debug('handling connection for ~w at ~w',[Peer, Server]),
+  debug('handling connection for %w at %w',[Peer, Server]),
   stream_pair(StreamPair,In,Out),
   ( read_message(In, Message) ->
     ( 
-      debug('Received request: ~w', [Message]),
+      debug('Received request: ~%w', [Message]),
       handle_message(Server, Peer,Out,Message)
      ) ;
     parse_error(Out) ),
   handle_connection(Server, Peer,StreamPair).
 
 handle_message(_, _Peer, Out, Message) :-
-  info('handlng message ~w~n',[Message]),
+  info('handlng message %w\n',[Message]),
   Message.get(jsonrpc) = "2.0" ->
     fail ;
     invalid_request(Out).
@@ -67,7 +67,7 @@ handle_request(Server, _Peer, Out, Request) :-
       Exception,
       dispatch_exception(Server,Request,Exception,Response)),
   write_message(Out,Response),
-  debug('Sent response: ~w', [Response]).
+  debug('Sent response: %w', [Response]).
 
 :- dynamic declared_server_method/3.
 
@@ -77,7 +77,7 @@ server_method(Server, Method, Module:Handler) :-
 
 dispatch_method(Server, Id, MethodName, Params, Response) :-
   find_handler(Server, MethodName, Module:Handler),
-  debug('found handler ~w:~w for ~w',[Module, Handler, Server]),
+  debug('found handler %w:%w for %w',[Module, Handler, Server]),
   apply(Module:Handler,[Result,Params]),
   Response = _{id: Id, result: Result }.
 

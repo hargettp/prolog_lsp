@@ -99,7 +99,7 @@ dispatch_connections(ServerName,Port,ServerFd) :-
   dispatch_connections(ServerName,Port,ServerFd).
 
 safe_handle_connection(ServerName, Port, Socket, Peer) :-
-  debug('handling connection from ~w on ~w', [Peer, Port]),
+  debug('handling connection from %w on %w', [Peer, Port]),
   setup_call_cleanup(
     setup_connection(ServerName, Port, Socket, Peer, StreamPair),
     catch(
@@ -114,7 +114,7 @@ setup_connection(ServerName, Port, Socket, Peer, StreamPair) :-
   % Note there is still a chance of races, but this hopefully helps with cleanup 
   % of connections; deliberately using asserta here
   asserta(jsonrpc_connection(ServerName, Port, Peer,ThreadId)),
-  info('Setup connection on ~w for ~w', [Port, Peer]),
+  info('Setup connection on %w for %w', [Port, Peer]),
   tcp_open_socket(Socket, StreamPair).
 
 cleanup_connection(ServerName, Port, Peer, StreamPair) :-
