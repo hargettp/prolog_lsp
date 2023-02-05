@@ -14,12 +14,14 @@ jsonrpc_connectors:connect_to_server(stdio(Program, Args), stdio_connection(Chil
     Args, 
     [
       process(ChildPID),
-      stdin(ConnectionIn),
-      stdout(ConnectionOut),
-      stderr(pipe(std))
+      stdin(pipe(ConnectionOut)),
+      stdout(pipe(ConnectionIn)),
+      stderr(std)
       ]
     ),
   stream_pair(StreamPair, ConnectionIn, ConnectionOut).
+
+jsonrpc_connectors:connection_stream_pair(stdio_connection(_, StreamPair), StreamPair).
 
 jsonrpc_connectors:close_connection(stdio_connection(ChildPID, StreamPair)) :-
   ignore(close(StreamPair)),

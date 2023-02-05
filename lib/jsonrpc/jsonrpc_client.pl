@@ -28,7 +28,7 @@ with_connection(ServerInfo,Connection,Goal) :-
     ).
 
 call_method(Connection, Method, Params, Result) :-
-  connection(_,StreamPair) = Connection,
+  connection_stream_pair(Connection,StreamPair),
   stream_pair(StreamPair,In,Out),
   uuid(Id),
   Request = _{jsonrpc: "2.0", id : Id, method: Method, params: Params},

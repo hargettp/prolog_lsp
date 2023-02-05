@@ -18,6 +18,8 @@ jsonrpc_connectors:connect_to_server(ServerAddress, Connection) :-
   tcp_connect(ServerAddress,StreamPair,[]),
   Connection = connection(ServerAddress,StreamPair).
 
+jsonrpc_connectors:connection_stream_pair(connection(_, StreamPair), StreamPair).
+
 % close_connection(Connnection)
 jsonrpc_connectors:close_connection(connection(_,StreamPair)) :-
   ignore(close(StreamPair)).
