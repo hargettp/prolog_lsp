@@ -1,4 +1,4 @@
-:- [load_lsp].
+:- [prolog/prolog_lsp].
 
 :- use_module(library(plunit)).
 
