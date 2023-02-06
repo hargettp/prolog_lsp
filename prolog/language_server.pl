@@ -3,8 +3,8 @@
   run_stdio_language_server/0,
   run_tcp_language_server/1,
 
-  start_language_server/1,
-  stop_language_server/1
+  start_tcp_language_server/1,
+  stop_tcp_language_server/1
 
 ]).
 
@@ -27,9 +27,9 @@ run_tcp_language_server(Port) :-
 
 % Run a language server asynchronously in a separate thread;
 % returns immediately, but server can be stopped with 
-% stop_language_server and the same arguments.
-start_language_server(Port) :-
+% stop_tcp_language_server and the same arguments.
+start_tcp_language_server(Port) :-
   start_jsonrpc_server(prolog_language_server, Port).
 
-stop_language_server(Port) :-
+stop_tcp_language_server(Port) :-
   stop_jsonrpc_server(prolog_language_server, Port).
