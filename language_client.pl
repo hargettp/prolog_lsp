@@ -8,7 +8,7 @@
   exit/1
   ]).
 
-:- use_module(lib(jsonrpc/jsonrpc_client)).
+:- use_module(jsonrpc/jsonrpc_client).
 
 stdio_language_connector(stdio(Program, Args)) :-
   Program = path(swipl),

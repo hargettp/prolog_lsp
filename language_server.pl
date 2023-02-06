@@ -13,7 +13,7 @@
 :- use_module(library(socket)).
 
 :- use_module(library(log4p)).
-:- use_module(lib(jsonrpc/connectors)).
+:- use_module(jsonrpc/connectors).
 
 % Run a language server synchronously in this process using stdio for streams; 
 % does not return until server exits
