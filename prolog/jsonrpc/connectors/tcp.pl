@@ -14,7 +14,7 @@
 % 
 
 % connect_to_server(Server, Connection)
-jsonrpc_connectors:connect_to_server(ServerAddress, Connection) :-
+jsonrpc_connectors:connect_to_server(tcp(ServerAddress), Connection) :-
   tcp_connect(ServerAddress,StreamPair,[]),
   Connection = connection(ServerAddress,StreamPair).
 

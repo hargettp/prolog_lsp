@@ -24,7 +24,7 @@ with_stdio_language(Connection, Goal) :-
   with_connection(Connector, Connection, Goal).
 
 with_tcp_language(Port, Connection, Goal) :-
-  with_connection('127.0.0.1':Port, Connection, Goal).
+  with_connection(tcp('127.0.0.1':Port), Connection, Goal).
 
 initialize(Connection,Result) :-
   call_method(Connection,initialize,[],Result).

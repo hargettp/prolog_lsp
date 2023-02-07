@@ -23,7 +23,7 @@ setup(stdio).
 setup(tcp, Connection) :-
   setup(tcp),
   sleep(0.25),
-  jsonrpc_connect('127.0.0.1':3401,Connection).
+  jsonrpc_connect(tcp('127.0.0.1':3401),Connection).
 
 setup(stdio, Connection) :-
   Program = path(swipl),
