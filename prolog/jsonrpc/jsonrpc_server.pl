@@ -3,8 +3,8 @@
 
   server_method/3,
   server_error/3,
-  echo/2,
-  crash/2
+  echo/3,
+  crash/3
 
 ]).
 
@@ -78,12 +78,12 @@ server_method(Server, Method, Module:Handler) :-
 dispatch_method(Server, Id, MethodName, Params, Response) :-
   find_handler(Server, MethodName, Module:Handler),
   debug('found handler %w:%w for %w',[Module, Handler, Server]),
-  apply(Module:Handler,[Result,Params]),
+  apply(Module:Handler,[Server, Result, Params]),
   Response = _{id: Id, result: Result }.
 
 dispatch_method(Server, MethodName, Params, Response) :-
   find_handler(Server, MethodName, Module:Handler),
-  apply(Module:Handler,[Result,Params]),
+  apply(Module:Handler,[Server, Result,Params]),
   Response = _{result: Result }.
 
 find_handler(Server,MethodName, Module:Handler) :-
@@ -102,10 +102,10 @@ dispatch_exception(Server, Message, Exception, Response) :-
     Response = BaseResponse).
 
 % simple method to echo parameters; good for testing
-echo(Params,Params) :-
+echo(_Server, Params, Params) :-
   info('Echoing %w', [Params]).
 
-crash(Params,Params) :-
+crash(_Server, Params,Params) :-
   warn("Intentionally crashing"),
   throw(crash).
 

@@ -10,9 +10,10 @@
 :- use_module(jsonrpc/connectors).
 :- use_module(jsonrpc/jsonrpc_server).
 :- use_module(jsonrpc/jsonrpc_client).
-:- use_module(methods).
 :- use_module(files).
 :- use_module(workspace).
 :- use_module(code).
+:- use_module(errors).
+:- use_module(methods).
 :- reexport(language_server).
 :- reexport(language_client).
