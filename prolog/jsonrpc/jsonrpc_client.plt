@@ -29,9 +29,9 @@ setup(stdio, Connection) :-
   Program = path(swipl),
   Args = [
     '-s',
-    'run.pl',
+    'test/servers',
     '-g',
-    'run_stdio_language_server'
+    'run_test_stdio_server'
   ],
   jsonrpc_connect(stdio(Program, Args), Connection).
 

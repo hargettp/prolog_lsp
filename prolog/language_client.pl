@@ -23,8 +23,11 @@ with_stdio_language(Connection, Goal) :-
   stdio_language_connector(Connector),
   with_connection(Connector, Connection, Goal).
 
+tcp_language_connector(Port, tcp('127.0.0.1':Port)).
+
 with_tcp_language(Port, Connection, Goal) :-
-  with_connection(tcp('127.0.0.1':Port), Connection, Goal).
+  tcp_language_connector(Port, Connector),
+  with_connection(Connector, Connection, Goal).
 
 initialize(Connection,Result) :-
   call_method(Connection,initialize,[],Result).

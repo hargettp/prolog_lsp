@@ -8,8 +8,8 @@
 
 :- use_module(jsonrpc/jsonrpc_protocol).
 :- use_module(jsonrpc/connectors).
-:- use_module(jsonrpc/jsonrpc_server).
-:- use_module(jsonrpc/jsonrpc_client).
+:- reexport(jsonrpc/jsonrpc_server).
+:- reexport(jsonrpc/jsonrpc_client).
 :- use_module(files).
 :- use_module(workspace).
 :- use_module(code).

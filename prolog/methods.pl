@@ -47,11 +47,11 @@ require_server_state(Server, Required) :-
 % 
 
 pls_echo(Server, Result, Params) :-
-  % require_server_state(Server, initialized),
+  require_server_state(Server, initialized),
   jsonrpc_server:echo(Server, Result, Params).
 
 pls_crash(Server, Result, Params) :-
-  % require_server_state(Server, initialized),
+  require_server_state(Server, initialized),
   jsonrpc_server:crash(Server, Result, Params).
 
 pls_initialize(Server, Result,Params) :-
