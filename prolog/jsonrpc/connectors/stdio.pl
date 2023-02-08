@@ -2,7 +2,7 @@
   create_stdio_server/2
   ]).
 
-:- use_module('../jsonrpc_server').
+:- use_module('../server').
 
 % 
 % Client methods

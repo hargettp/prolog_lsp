@@ -1,5 +1,5 @@
-:- begin_tests(jsonrpc_protocol).
-:- use_module(jsonrpc_protocol).
+:- begin_tests(protocol).
+:- use_module(protocol).
 :- use_module(library(http/json)).
 
 with_input_from(String, Module:Goal) :-
@@ -115,4 +115,4 @@ with_input_from(String, Module:Goal) :-
   %     ).
 
     
-:- end_tests(jsonrpc_protocol).
+:- end_tests(protocol).

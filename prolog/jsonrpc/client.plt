@@ -1,8 +1,8 @@
 :- begin_tests(jsonrpc_client).
 
-:- use_module(jsonrpc_protocol).
-:- use_module(jsonrpc_client).
-:- use_module(jsonrpc_server).
+:- use_module(protocol).
+:- use_module(client).
+:- use_module(server).
 :- use_module(connectors).
 
 :- use_module(library(log4p)).

@@ -11,7 +11,7 @@
 
 :- use_module(library(log4p)).
 
-:- use_module('./jsonrpc_protocol').
+:- use_module('./protocol').
 :- use_module('./connectors').
 
 jsonrpc_connect(ServerInfo,Connection) :-

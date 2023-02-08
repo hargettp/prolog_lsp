@@ -6,10 +6,10 @@
 % Let's reconfigure logging to use stderr
 :- initialization(use_stderr_log_handler).
 
-:- use_module(jsonrpc/jsonrpc_protocol).
+:- use_module(jsonrpc/protocol).
 :- use_module(jsonrpc/connectors).
-:- reexport(jsonrpc/jsonrpc_server).
-:- reexport(jsonrpc/jsonrpc_client).
+:- reexport(jsonrpc/server).
+:- reexport(jsonrpc/client).
 :- use_module(files).
 :- use_module(workspace).
 :- use_module(code).

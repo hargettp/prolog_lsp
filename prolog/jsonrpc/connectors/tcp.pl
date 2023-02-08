@@ -7,7 +7,7 @@
 
 :- use_module(library(socket)).
 :- use_module(library(log4p)).
-:- use_module('../jsonrpc_server').
+:- use_module('../server').
 
 % 
 % Client methods
