@@ -19,12 +19,22 @@
 :- dynamic declared_server_error/3.
 
 dispatch_exception(Server, Message, Exception, Response) :-
-  declared_server_error(Server, Exception, Module:Handler),
+  % declared_server_error(Server, Exception, Module:Handler),
+  find_handler(Server, Exception, Module:Handler),
   apply(Module:Handler, [Server, Exception, Error]),
   BaseResponse = _{error: Error},
   (Id = Message.get(id) ->
     Response = BaseResponse.put(id,Id) ;
     Response = BaseResponse).
+
+find_handler(Server, Exception, Module:Handler) :-
+  declared_server_error(Server, Exception, Module:Handler),
+  nonvar(Server).
+  % debug('found nonvar handler: %w:%w',[Module, Handler]).
+  
+find_handler(Server, Exception, Module:Handler) :-
+  declared_server_error(Server, Exception, Module:Handler).
+  % debug('found var handler: %w:%w',[Module, Handler]).
 
 server_error(Server, Error, Module:Handler) :-
   Clause = declared_server_error(Server, Error, Module:Handler),

@@ -1,4 +1,4 @@
-:- module(methods,[
+:- module(lsp_methods,[
 
   ]).
 
@@ -9,6 +9,7 @@
 
 :- server_method(prolog_language_server, echo, pls_echo).
 :- server_method(prolog_language_server, crash, pls_crash).
+:- server_method(prolog_language_server, methods, pls_methods).
 
 :- server_method(prolog_language_server, initialize, pls_initialize).
 :- server_method(prolog_language_server, initialized, pls_initialized).
@@ -33,14 +34,14 @@ set_server_state(Server, State) :-
   assertz(language_server_state(Server, State)).
 
 require_server_state(Server, Required) :-
-  get_server_state(Server, Required), !.
+  get_server_state(Server, Required), 
+  debug('for %w required state of %w is met', [Server, Required]),
+  !.
 
 require_server_state(Server, Required) :-
   get_server_state(Server, State),
-  ( State == Required
-    -> true
-    ; throw(invalid_state(Required, State)) 
-    ).
+  debug('for %w required state of %w but is %w', [Server, Required, State]),
+  throw(invalid_state(Required, State)).
 
 % 
 % Methods
@@ -53,6 +54,15 @@ pls_echo(Server, Result, Params) :-
 pls_crash(Server, Result, Params) :-
   require_server_state(Server, initialized),
   jsonrpc_server:crash(Server, Result, Params).
+
+% pls_methods(Server, Result, _Params) :-
+%   % require_server_state(Server, initialized),
+%   findall(
+%     Method, 
+%     current_predicate(_Name, jsonrpc_methods:declared_server_method(_:Server, _:Method, _:_)),
+%     Methods
+%     ),
+%   Result = Methods.
 
 pls_initialize(Server, Result,Params) :-
   \+ get_server_state(Server, _),
