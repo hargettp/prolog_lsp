@@ -4,6 +4,8 @@
 
 :- use_module(library(log4p)).
 :- use_module(jsonrpc/server).
+:- use_module(jsonrpc/methods).
+:- use_module(jsonrpc/errors).
 :- use_module(code).
 :- use_module(workspace).
 

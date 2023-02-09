@@ -3,6 +3,7 @@
 :- use_module(protocol).
 :- use_module(client).
 :- use_module(server).
+:- use_module(methods).
 :- use_module(connectors).
 
 :- use_module(library(log4p)).

@@ -1,9 +1,6 @@
 :- module(jsonrpc_server,[
   handle_connection/3,
 
-  server_method/3,
-  server_error/3,
-  
   echo/3,
   crash/3
 
@@ -13,12 +10,8 @@
 
 :- use_module(library(log4p)).
 :- use_module('./protocol').
-
-:- meta_predicate
-  server_method(:,:,:),
-  declared_server_method(:,:,:),
-  server_error(:,:,:),
-  declared_server_error(:,:,:).
+:- use_module('./methods').
+:- use_module('./errors').
 
 % jsonrpc_server(Server, Port, ServerThreadId)
 :- dynamic jsonrpc_server/3.
@@ -70,12 +63,6 @@ handle_request(Server, _Peer, Out, Request) :-
   write_message(Out,Response),
   debug('Sent response: %w', [Response]).
 
-:- dynamic declared_server_method/3.
-
-server_method(Server, Method, Module:Handler) :-
-  Clause = declared_server_method(Server, Method, Module:Handler),
-  ( Clause ; assertz(Clause) ).
-
 dispatch_method(Server, Id, MethodName, Params, Response) :-
   find_handler(Server, MethodName, Module:Handler),
   debug('found handler %w:%w for %w',[Module, Handler, Server]),
@@ -87,21 +74,6 @@ dispatch_method(Server, MethodName, Params, Response) :-
   apply(Module:Handler,[Server, Result,Params]),
   Response = _{result: Result }.
 
-find_handler(Server,MethodName, Module:Handler) :-
-  atom_string(Method,MethodName),
-  (declared_server_method(_MServer:Server, _MMethod:Method, Module:Handler) ;
-    throw(unknown_method(Method))).
-
-:- dynamic declared_server_error/3.
-
-dispatch_exception(Server, Message, Exception, Response) :-
-  declared_server_error(Server, Exception, Module:Handler),
-  apply(Module:Handler, [Server, Exception, Error]),
-  BaseResponse = _{error: Error},
-  (Id = Message.get(id) ->
-    Response = BaseResponse.put(id,Id) ;
-    Response = BaseResponse).
-
 % simple method to echo parameters; good for testing
 echo(_Server, Params, Params) :-
   info('Echoing %w', [Params]).
@@ -109,29 +81,3 @@ echo(_Server, Params, Params) :-
 crash(_Server, Params,Params) :-
   warn("Intentionally crashing"),
   throw(crash).
-
-unknown_method(Server, unknown_method(Method),Error) :-
-  warn("Method not found for %w: %w",[Server, Method]),
-  Error = _{code: -32601, message: "Method not found", data: Method },!.
-
-server_error(Server, Error, Module:Handler) :-
-  Clause = declared_server_error(Server, Error, Module:Handler),
-  ( Clause ; assertz(Clause) ).
-
-unknown_error(_Server, Exception, Error) :-
-  error("An unknown error occurred: %t", [Exception]),
-  Error = _{code: -32000, message: "An unknown error occurred" }, !.
-
-parse_error(Out) :-
-  Error = _{code: -32700, message: "Parse error" },
-  Response = _{error: Error},
-  write_message(Out, Response).
-
-invalid_request(Out) :-
-  Error = _{code: -32600, message: "Invalid Request" },
-  Response = _{error: Error},
-  write_message(Out, Response).
-
-:- server_error(_,unknown_method(_),jsonrpc_server:unknown_method).
-
-:- server_error(_,_,jsonrpc_server:unknown_error).

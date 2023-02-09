@@ -5,6 +5,7 @@
 :- use_module(library(log4p)).
 :- use_module(jsonrpc/server).
 :- use_module(jsonrpc/protocol).
+:- use_module(jsonrpc/errors).
 
 :- server_error(prolog_language_server, invalid_state(_, _), invalid_state).
 
