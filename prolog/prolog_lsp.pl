@@ -8,8 +8,6 @@
 
 :- use_module(jsonrpc/protocol).
 :- use_module(jsonrpc/connectors).
-:- reexport(jsonrpc/methods).
-:- reexport(jsonrpc/errors).
 :- reexport(jsonrpc/server).
 :- reexport(jsonrpc/client).
 :- use_module(files).

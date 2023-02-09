@@ -10,8 +10,8 @@
 
 :- use_module(library(log4p)).
 :- use_module('./protocol').
-:- use_module('./methods').
-:- use_module('./errors').
+:- reexport('./methods').
+:- reexport('./errors').
 
 % jsonrpc_server(Server, Port, ServerThreadId)
 :- dynamic jsonrpc_server/3.

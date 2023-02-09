@@ -1,6 +1,5 @@
 :- module(jsonrpc_methods, [
   server_method/3,
-  declared_server_method/3,
   find_handler/3
   ]).
 

@@ -1,10 +1,12 @@
 :- module(jsonrpc_errors, [
   dispatch_exception/4,
-  parse_error/1,
+  server_error/3,
+
   unknown_method/3,
   unknown_error/3,
-  invalid_request/1,
-  server_error/3
+  
+  parse_error/1,
+  invalid_request/1
   ]).
 
 :- use_module(library(log4p)).
