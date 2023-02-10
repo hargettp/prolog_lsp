@@ -7,7 +7,7 @@
 :- use_module('./methods').
 
 run_test_stdio_server :-
-  set_log_level(debug, _),
+  % set_log_level(debug, _),
   create_stdio_server(jsonrpc_client_test, Server),
   serve_messages(Server).
 
