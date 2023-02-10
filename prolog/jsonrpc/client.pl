@@ -43,7 +43,7 @@ call_method(Connection, Method, Params, Result) :-
   !.
 
 notify_method(Connection, Method, Params) :-
-  connection(_,StreamPair) = Connection,
+  connection_stream_pair(Connection,StreamPair),
   stream_pair(StreamPair,_In,Out),
   Request = _{jsonrpc: "2.0", method: Method, params: Params},
   write_message(Out, Request),

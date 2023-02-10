@@ -19,7 +19,9 @@
 % Run a language server synchronously in this process using stdio for streams; 
 % does not return until server exits
 run_stdio_language_server :-
-  create_stdio_server(prolog_language_server, Server),
+  ServerName = prolog_language_server,
+  create_stdio_server(ServerName, Server),
+  debug('Starting %w on stdio',[ServerName]),
   serve_messages(Server).
 
 run_tcp_language_server(Port) :-

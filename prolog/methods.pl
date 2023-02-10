@@ -31,7 +31,9 @@ get_server_state(Server, State) :-
 
 set_server_state(Server, State) :-
   retractall(language_server_state(Server, _)),
-  assertz(language_server_state(Server, State)).
+  debug("Setting server %w state to %w", [Server, State]),
+  assertz(language_server_state(Server, State)),
+  debug("Server %w state set to %w", [Server, State]).
 
 require_server_state(Server, Required) :-
   get_server_state(Server, Required), 
@@ -55,14 +57,14 @@ pls_crash(Server, Result, Params) :-
   require_server_state(Server, initialized),
   jsonrpc_server:crash(Server, Result, Params).
 
-% pls_methods(Server, Result, _Params) :-
-%   % require_server_state(Server, initialized),
-%   findall(
-%     Method, 
-%     current_predicate(_Name, jsonrpc_methods:declared_server_method(_:Server, _:Method, _:_)),
-%     Methods
-%     ),
-%   Result = Methods.
+pls_methods(Server, Result, _Params) :-
+  % require_server_state(Server, initialized),
+  findall(
+    Method, 
+    clause(jsonrpc_methods:declared_server_method(_:Server, _:Method, _:_),_),
+    Methods
+    ),
+  Result = Methods.
 
 pls_initialize(Server, Result,Params) :-
   \+ get_server_state(Server, _),
