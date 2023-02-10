@@ -49,10 +49,13 @@ test(echo,[forall(member(Type, [stdio, tcp])), setup(setup(Type, Connection)),cl
   call_method(Connection,echo,[],[]).
 
 test(missing,[forall(member(Type, [stdio, tcp])), setup(setup(Type, Connection)),cleanup(teardown(Type, Connection))]) :-
-  catch(
+  expect_error(
     call_method(Connection,missing,[],[]),
-    jsonrpc_error(Error),
-    (Error.code = -32601, Error.data = "missing" , Error.message = "Method not found")
+    jsonrpc_error(_{
+      code: -32601, 
+      message: "Method not found",
+      data: "missing"
+      })
     ).
 
 test(crash,[forall(member(Type, [stdio, tcp])), setup(setup(Type, Connection)),cleanup(teardown(Type, Connection))]) :-

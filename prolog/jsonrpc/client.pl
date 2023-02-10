@@ -4,7 +4,9 @@
     with_connection/3,
 
     call_method/4,
-    notify_method/3
+    notify_method/3,
+
+    expect_error/2
   ]).
 
 :- use_module(library(uuid)).
@@ -48,3 +50,21 @@ notify_method(Connection, Method, Params) :-
   Request = _{jsonrpc: "2.0", method: Method, params: Params},
   write_message(Out, Request),
   !.
+
+% 
+% Helpers, usually for testing
+% 
+
+expect_error(Goal, ExpectedError) :-
+  catch(
+    (Goal, fail),
+    ActualError,
+    true
+    ),
+  ( ExpectedError = ActualError
+    -> true
+    ; ( 
+      warn("Expected error %q, ecnountered %q",[ExpectedError, ActualError]), 
+      fail
+      )
+    ).

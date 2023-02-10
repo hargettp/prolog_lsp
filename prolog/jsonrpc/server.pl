@@ -61,7 +61,11 @@ handle_request(Server, _Peer, Out, Request) :-
       Exception,
       dispatch_exception(Server,Request,Exception,Response)),
   write_message(Out,Response),
-  debug('Sent response: %w', [Response]).
+  debug('Sent response: %w', [Response]),
+  !.
+
+handle_request(_Server, _Peer, Out, _Request) :-
+  invalid_request(Out).
 
 dispatch_method(Server, Id, MethodName, Params, Response) :-
   find_handler(Server, MethodName, Module:Handler),

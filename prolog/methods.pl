@@ -6,6 +6,7 @@
 :- use_module(jsonrpc/server).
 :- use_module(code).
 :- use_module(workspace).
+:- use_module(errors).
 
 % Initialization
 :- server_method(prolog_language_server, initialize, pls_initialize).
@@ -107,19 +108,19 @@ pls_text_document_did_close(_Server, _Result,_Params).
 
 % Shutdown
 
-pls_shutdown(_Server, Result) :-
+pls_shutdown(Server, Result, _Params) :-  
   require_server_state(Server, initialized),
-  info("Method shutdown called"),
   % we don't actually shut anything down right now
-  Result = null,
-  set_server_state(Server, shutting_down).
+  Result = _{},
+  set_server_state(Server, shutting_down),
+  info("Method shutdown called").
 
-pls_exit(Server, Result) :-
-  require_server_state(Server, shutting_down),
-  info("Method exit called"),
-  % we don't actually exit anything down right now
-  Result = null,
-  halt.
+% pls_exit(Server, _Params, Result) :-
+%   require_server_state(Server, shutting_down),
+%   info("Method exit called"),
+%   % we don't actually exit anything down right now
+%   Result = _{},
+%   halt.
 
 pls_workspace_symbols(_Server, Symbols, Query) :-
   workspace_symbols(Query, Symbols).
