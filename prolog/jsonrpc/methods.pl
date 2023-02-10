@@ -19,4 +19,3 @@ find_handler(Server,MethodName, Module:Handler) :-
   atom_string(Method,MethodName),
   (declared_server_method(_MServer:Server, _MMethod:Method, Module:Handler) ;
     throw(unknown_method(Method))).
-

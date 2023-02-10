@@ -1,4 +1,5 @@
 :- module(language_client, [
+  stdio_language_connector/1,
   with_stdio_language/2,
   with_tcp_language/3,
 
@@ -8,7 +9,7 @@
   exit/1
   ]).
 
-:- use_module(jsonrpc/client).
+:- reexport(jsonrpc/client).
 
 stdio_language_connector(stdio(Program, Args)) :-
   Program = path(swipl),

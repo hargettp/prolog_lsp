@@ -1,4 +1,4 @@
-:- module(errors,[
+:- module(lsp_errors,[
 
   ]).
 

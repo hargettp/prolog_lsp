@@ -16,13 +16,13 @@ setup(tcp) :-
     Exception,
     error("Could not start test server: %t",[Exception])
     ),
-  sleep(0.25).
+  sleep(0.1).
 
 setup(stdio).
 
 setup(tcp, Connection) :-
   setup(tcp),
-  sleep(0.25),
+  sleep(0.1),
   jsonrpc_connect(tcp('127.0.0.1':3401),Connection).
 
 setup(stdio, Connection) :-
@@ -37,7 +37,7 @@ setup(stdio, Connection) :-
 
 teardown(tcp) :-
   stop_jsonrpc_server(jsonrpc_client_test,3401),
-  sleep(0.25).
+  sleep(0.1).
 
 teardown(stdio).
 

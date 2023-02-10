@@ -31,7 +31,7 @@ handle_connection(Server, Peer, StreamPair) :-
   handle_connection(Server, Peer,StreamPair).
 
 handle_message(_, _Peer, Out, Message) :-
-  info('handlng message %w\n',[Message]),
+  info('handlng message %w',[Message]),
   Message.get(jsonrpc) = "2.0" ->
     fail ;
     invalid_request(Out).
