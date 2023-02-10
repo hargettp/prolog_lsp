@@ -7,13 +7,22 @@
 :- use_module(code).
 :- use_module(workspace).
 
+% Initialization
+:- server_method(prolog_language_server, initialize, pls_initialize).
+:- server_method(prolog_language_server, initialized, pls_initialized).
+
+% Utility
 :- server_method(prolog_language_server, echo, pls_echo).
 :- server_method(prolog_language_server, crash, pls_crash).
 :- server_method(prolog_language_server, methods, pls_methods).
 
-:- server_method(prolog_language_server, initialize, pls_initialize).
-:- server_method(prolog_language_server, initialized, pls_initialized).
 
+% Text Document Synchronization
+:- server_method(prolog_language_server, 'textDocument/didOpen', pls_text_document_did_open).
+:- server_method(prolog_language_server, 'textDocument/didChange', pls_text_document_did_change).
+:- server_method(prolog_language_server, 'textDocument/didClose', pls_text_document_did_close).
+
+% Shutdown
 :- server_method(prolog_language_server, shutdown, pls_shutdown).
 :- server_method(prolog_language_server, exit, pls_exit).
 
@@ -45,8 +54,33 @@ require_server_state(Server, Required) :-
   debug('for %w required state of %w but is %w', [Server, Required, State]),
   throw(invalid_state(Required, State)).
 
+% -------------------
 % 
 % Methods
+% 
+% - - - - - - - - - -
+
+%
+% Initialization
+% 
+
+pls_initialize(Server, Result,Params) :-
+  \+ get_server_state(Server, _),
+  info("Method initialize called"),
+  info("Client capabilities: %w",[Params]),
+  server_capabilities(Capabilities),
+  Result = _{
+    capabilities: Capabilities
+    },
+  set_server_state(Server, initializing).
+
+pls_initialized(Server, _Result,_Params) :-
+  require_server_state(Server, initializing),
+  info("Notification initialized called"),
+  set_server_state(Server, initialized).
+
+% 
+% Utility
 % 
 
 pls_echo(Server, Result, Params) :-
@@ -66,20 +100,12 @@ pls_methods(Server, Result, _Params) :-
     ),
   Result = Methods.
 
-pls_initialize(Server, Result,Params) :-
-  \+ get_server_state(Server, _),
-  info("Method initialize called"),
-  info("Client capabilities: %w",[Params]),
-  server_capabilities(Capabilities),
-  Result = _{
-    capabilities: Capabilities
-    },
-  set_server_state(Server, initializing).
+% Text Document sync
+pls_text_document_did_open(_Server, _Result,_Params).
+pls_text_document_did_change(_Server, _Result,_Params).
+pls_text_document_did_close(_Server, _Result,_Params).
 
-pls_initialized(Server, _Result,_Params) :-
-  require_server_state(Server, initializing),
-  info("Notification initialized called"),
-  set_server_state(Server, initialized).
+% Shutdown
 
 pls_shutdown(_Server, Result) :-
   require_server_state(Server, initialized),
@@ -101,4 +127,9 @@ pls_workspace_symbols(_Server, Symbols, Query) :-
 % common data structures
 server_capabilities(Capabilities) :-
   Capabilities = _{
-    }.
+    textDocumentSync: _{
+      openClose: true,
+      % This means the client sends the full content on each change
+      change: 1
+    }
+  }.

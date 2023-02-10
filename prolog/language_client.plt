@@ -40,7 +40,19 @@ test(methods,[
   call_method(Connection,initialize,[],_R),
   notify_method(Connection, initialized,[]),
   call_method(Connection,methods,[],Actual),
-  Expected = ["echo","crash","methods","initialize","initialized","shutdown","exit","workspace/symbol"],
+  Expected = [
+    "initialize",
+    "initialized",
+    "echo",
+    "crash",
+    "methods",
+    "textDocument/didOpen",
+    "textDocument/didChange",
+    "textDocument/didClose",
+    "shutdown",
+    "exit",
+    "workspace/symbol"
+    ],
   Actual = Expected.
 
 :- end_tests(language_client).
