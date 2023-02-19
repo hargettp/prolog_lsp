@@ -33,7 +33,7 @@ clear_document_items(URI) :-
   clear_document_item(URI, _).
 
 clear_document_item(URI, Clear) :-
-  retractall(document_itenm(URI, Clear)).
+  retractall(document_item(URI, Clear)).
 
 set_document_content(URI, Content) :-
   clear_document_content(URI),

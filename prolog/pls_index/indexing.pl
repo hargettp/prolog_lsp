@@ -22,7 +22,7 @@ with_input_from(String, Goal) :-
 index_text(URI, Text) :-
   with_input_from(Text, 
     index_terms(URI)
-    ).
+    ), !.
 
 index_terms(URI) :-
   read_in_term(URI, Term, Context),
@@ -41,6 +41,8 @@ read_in_term(URI, Term, Context) :-
   read_term(Term, Context),
   process_term(URI, Term, Context).
 
+process_term(_URI, end_of_file, _).
+
 process_term(URI, :-(Directive), Context) :-
   process_directive(URI, Directive, Context).
 
@@ -49,6 +51,10 @@ process_term(URI, (Head :- Body), Context) :-
 
 process_term(URI, Fact, Context) :-
   process_clause(URI, Fact, Context).
+
+process_directive(URI, [FileSpec], Context) :-
+  option(term_position(Position), Context),
+  add_document_item(URI, loads(FileSpec, Position)).
 
 process_directive(URI, module(Name, PublicList), _Context) :-
   set_document_item(URI, module(Name)),
@@ -66,16 +72,18 @@ process_directive(URI, Goal, Context) :-
     -> true
     ; process_directive_call(URI, Name/Arity, Context)
     ),
-  forall(arg(_I,Goal, Arg), once(process_directive_goal(URI, Arg, Context))).
+  (Arity > 0 
+    -> forall(arg(_I,Goal, Arg), once(process_directive_goal(URI, Arg, Context)))
+    ; true).
 
 process_directive_goal(_URI, Goal, _Context) :-
-  var(Goal).
+  var(Goal), !.
 
 process_directive_goal(_URI, Goal, _Context) :-
-  atom(Goal).
+  atom(Goal), !.
   
 process_directive_goal(_URI, Goal, _Context) :-
-  \+ compound(Goal).
+  \+ compound(Goal), !.
 
 process_directive_goal(URI, Goal, Context) :-
   functor(Goal, Name, Arity),
@@ -112,13 +120,13 @@ process_body(URI, Head, Body, Context) :-
   process_goal(URI, Name/Arity, Body, Context).
 
 process_goal(_URI, _Caller, Goal, _Context) :-
-  var(Goal).
+  var(Goal), !.
 
 process_goal(_URI, _Caller, Goal, _Context) :-
-  atom(Goal).
+  atom(Goal), !.
   
 process_goal(_URI, _Caller, Goal, _Context) :-
-  \+ compound(Goal).
+  \+ compound(Goal), !.
 
 process_goal(URI, CallerName/CallerArity, Goal, Context) :-
   functor(Goal, Name, Arity),
