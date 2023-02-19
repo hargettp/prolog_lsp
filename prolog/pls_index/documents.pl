@@ -21,6 +21,9 @@ add_document_item(URI, Item) :-
   assertz(document_item(URI, Item)).
 
 set_document_item(URI, Item) :-
+  functor(Item, Name, Arity),
+  functor(Clear, Name, Arity),
+  clear_document_item(URI, Clear),
   assertz(document_item(URI, Item)).
 
 get_document_item(URI, Item) :-
@@ -29,8 +32,8 @@ get_document_item(URI, Item) :-
 clear_document_items(URI) :-
   clear_document_item(URI, _).
 
-clear_document_item(URI, ItemPattern) :-
-  retractall(document_itenm(URI, ItemPattern)).
+clear_document_item(URI, Clear) :-
+  retractall(document_itenm(URI, Clear)).
 
 set_document_content(URI, Content) :-
   clear_document_content(URI),
