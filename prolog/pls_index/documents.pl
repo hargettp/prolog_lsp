@@ -1,7 +1,8 @@
 :- module(pls_index_documents, [
   store_document/4,
 
-    clear_document_items/1,
+  clear_document_items/1,
+  get_document_items/2,
 
   add_document_item/2,
   set_document_item/2,
@@ -18,6 +19,9 @@ store_document(URI, Language, Version, Content) :-
   set_document_item(URI, language(Language)),
   set_document_item(URI, version(Version)),
   set_document_content(URI, Content).
+
+get_document_items(URI, Items) :-
+  findall(Item, document_item(URI, Item), Items).
 
 add_document_item(URI, Item) :-
   assertz(document_item(URI, Item)).
