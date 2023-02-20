@@ -1,6 +1,8 @@
 :- module(pls_index_documents, [
   store_document/4,
 
+    clear_document_items/1,
+
   add_document_item/2,
   set_document_item/2,
   get_document_item/2,
@@ -12,7 +14,7 @@
 :- dynamic document_content/2.
 
 store_document(URI, Language, Version, Content) :-
-  retractall(document_item(URI, _)),
+  clear_document_items(URI),
   set_document_item(URI, language(Language)),
   set_document_item(URI, version(Version)),
   set_document_content(URI, Content).

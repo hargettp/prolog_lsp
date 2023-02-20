@@ -25,21 +25,21 @@ index_text(URI, Text) :-
     ), !.
 
 index_terms(URI) :-
-  read_in_term(URI, Term, Context),
+  read_in_term(Term, Context),
+  process_term(URI, Term, Context),
   ( Term = end_of_file 
     -> true
-    ; ( process_term(URI, Term, Context) , index_terms(URI))
+    ; index_terms(URI)
     ).
 
-read_in_term(URI, Term, Context) :-
+read_in_term(Term, Context) :-
   Context = [
     comments(_Comments),
     syntax_errors(dec10),
     variable_names(_VariableNames),
     term_position(_TermPosition)
     ],
-  read_term(Term, Context),
-  process_term(URI, Term, Context).
+  read_term(Term, Context).
 
 process_term(_URI, end_of_file, _).
 
