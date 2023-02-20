@@ -5,9 +5,6 @@
 :- use_module(library(option)).
 :- use_module(documents).
 
-% :- meta_predicate with_input_from(?,:).
-
-% with_input_from(String, Module:Goal) :-
 with_input_from(String, Goal) :-
   setup_and_call_cleanup(
     open_string(String, In),
