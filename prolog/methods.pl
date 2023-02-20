@@ -7,7 +7,7 @@
 :- use_module(code).
 :- use_module(errors).
 :- use_module(workspace).
-:- use_module(documents).
+:- use_module(pls_index).
 
 % Initialization
 :- server_method(prolog_language_server, initialize, pls_initialize).
@@ -117,7 +117,7 @@ pls_text_document_did_open(_Server, _Result, Params) :-
 pls_text_document_did_change(_Server, _Result, Params) :-
   Document = Params.textDocument,
   Changes = Params.contentChanges,
-  find_document_item(Document.uri, Language, _Version),
+  get_document_item(Document.uri, language(Language)),
   store_document(Document.uri, Language, Document.version, Changes.text).
 
 pls_text_document_did_close(_Server, _Result, _Params).
