@@ -1,6 +1,7 @@
 :- begin_tests(pls_index_indexing).
 
 :- use_module(library(prolog_stack)).
+:- use_module(library(uri)).
 
 :- use_module(documents).
 :- use_module(indexing).
@@ -22,7 +23,7 @@ expected_vs_actual([], _) :- fail.
 test(reading) :-
   read_file_to_string('./test.pl', Content, []),
   URI = 'file://test.pl',
-  clear_document_items(URI),
+  % clear_document_items(URI),
   index_text('file://test.pl', Content),
   get_document_items(URI, Actual),
   Expected = [
@@ -35,5 +36,9 @@ test(reading) :-
     calls(run_tests/0,_)
   ],
   once(expected_vs_actual(Expected, Actual)).
+
+test(index_roots) :-
+  uri_file_name(URI, '.'),
+  index_roots([URI]).
 
 :- end_tests(pls_index_indexing).

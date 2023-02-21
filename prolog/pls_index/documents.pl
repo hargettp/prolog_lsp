@@ -1,24 +1,51 @@
 :- module(pls_index_documents, [
   store_document/4,
 
-  clear_document_items/1,
-  get_document_items/2,
+  get_document_properties/2,
+  add_document_property/2,
+  set_document_property/2,
+  get_document_property/2,
+  clear_document_properties/1,
 
+  get_document_items/2,
   add_document_item/2,
   set_document_item/2,
   get_document_item/2,
+  clear_document_items/1,
 
   get_document_content/2
   ]).
 
+:- dynamic document_property/2.
 :- dynamic document_item/2.
 :- dynamic document_content/2.
 
 store_document(URI, Language, Version, Content) :-
-  clear_document_items(URI),
-  set_document_item(URI, language(Language)),
-  set_document_item(URI, version(Version)),
+  clear_document_properties(URI),
+  set_document_property(URI, language(Language)),
+  set_document_property(URI, version(Version)),
   set_document_content(URI, Content).
+
+get_document_properties(URI, Properties) :-
+  findall(Property, document_property(URI, Property), Properties).
+
+add_document_property(URI, Property) :-
+  assertz(document_property(URI, Property)).
+
+set_document_property(URI, Property) :-
+  functor(Property, Name, Arity),
+  functor(Clear, Name, Arity),
+  clear_document_property(URI, Clear),
+  assertz(document_property(URI, Property)).
+
+get_document_property(URI, Property) :-
+  document_property(URI, Property).
+
+clear_document_properties(URI) :-
+  clear_document_property(URI, _).
+
+clear_document_property(URI, Clear) :-
+  retractall(document_property(URI, Clear)).
 
 get_document_items(URI, Items) :-
   findall(Item, document_item(URI, Item), Items).
@@ -69,21 +96,21 @@ clear_content(URI) :-
 % -- language --
 set_language(URI, Language) :-
   clear_language(URI),
-  set_document_item(URI, language(Language)).
+  set_document_property(URI, language(Language)).
 
 get_language(URI, Language) :-
-  once(get_document_item(URI, language(Language))).
+  once(get_document_property(URI, language(Language))).
 
 clear_language(URI) :-
-  clear_document_item(URI, language(_)).
+  clear_document_property(URI, language(_)).
 
 % -- version --
 set_version(URI, Version) :-
   clear_version(URI),
-  set_document_item(URI, version(Version)).
+  set_document_property(URI, version(Version)).
 
 get_version(URI, Version) :-
-  once(get_document_item(URI, version(Version))).
+  once(get_document_property(URI, version(Version))).
 
 clear_version(URI) :-
-  clear_document_item(URI, version(_)).
+  clear_document_property(URI, version(_)).

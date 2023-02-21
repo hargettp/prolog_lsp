@@ -1,8 +1,17 @@
 :- module(pls_index_indexing, [
-  index_text/2
+  index_text/2,
+
+  start_index_roots/1,
+
+  index_roots/1,
+  index_root/1
   ]).
 
+:- use_module(library(log4p)).
 :- use_module(library(option)).
+:- use_module(library(prolog_source)).
+:- use_module(library(uri)).
+
 :- use_module(documents).
 
 with_input_from(String, Goal) :-
@@ -16,7 +25,30 @@ with_input_from(String, Goal) :-
     close(In)
     ).
 
+% asynchronously index all files under the specified roots,
+% which should be an array of URIs for each root
+start_index_roots(Roots) :-
+  thread_create(index_roots(Roots), _Id, [detached(true)]).
+
+index_roots(Roots) :-
+  info("Starting indexing of files in all roots: %w", [Roots]),
+  forall(member(Root, Roots), index_root(Root)),
+  info("Finished indexing of files in all roots: %w", [Roots]).
+
+index_root(URI) :-
+  info("Starting index of files in root %w", [URI]),
+  uri_file_name(URI, Directory),
+  directory_source_files(Directory, Files, [recursive(true)]),
+  forall(member(File, Files), index_file(File)),
+  info("Finished index of files in root %w", [URI]).
+
+index_file(Source) :-
+  read_file_to_string(Source, Content, []),
+  uri_file_name(URI, Source),
+  index_text(URI, Content).
+
 index_text(URI, Text) :-
+  clear_document_items(URI),
   with_input_from(Text, 
     index_terms(URI)
     ), !.

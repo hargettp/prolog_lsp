@@ -120,7 +120,7 @@ pls_text_document_did_change(_Server, _Result, Params) :-
   Changes = Params.contentChanges,
   URI = Document.uri,
   Content = Changes.text,
-  get_document_item(URI, language(Language)),
+  get_document_property(URI, language(Language)),
   store_document(URI, Language, Document.version, Content),
   index_text(URI, Content).
 
