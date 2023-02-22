@@ -43,6 +43,8 @@ index_root(URI) :-
   info("Finished index of files in root %w", [URI]).
 
 index_file(Source) :-
+  file_name_extension(_Base, Extension, Source),
+  prolog_extension(Extension),
   read_file_to_string(Source, Content, []),
   uri_file_name(URI, Source),
   index_text(URI, Content).
@@ -183,3 +185,10 @@ is_builtin(Name/Arity) :-
     ('.')/3
     ]).
   
+  prolog_extension(Extension) :-
+    member(Extension, [
+      pl,
+      plt,
+      pro,
+      prolog
+      ]).
