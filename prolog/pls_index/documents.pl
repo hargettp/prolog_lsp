@@ -82,7 +82,8 @@ clear_document_content(URI) :-
 % 
 % xref support for documents being edited
 % 
-prolog:xref_open_source(URI, Stream) :-
+prolog:xref_open_source(FileName, Stream) :-
+  uri_file_name(URI, FileName),
   get_document_content(URI, Content),
   open_string(Content, Stream).
   
