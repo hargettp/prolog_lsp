@@ -87,7 +87,7 @@ prolog:xref_open_source(FileName, Stream) :-
   get_document_content(URI, Content),
   open_string(Content, Stream).
   
-prolog:xref_close_source(_URI, Stream) :-
+prolog:xref_close_source(_FileName, Stream) :-
   close(Stream).
 
 % 
