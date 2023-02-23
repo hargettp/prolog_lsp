@@ -124,7 +124,10 @@ pls_text_document_did_change(_Server, _Result, Params) :-
   store_document(URI, Language, Document.version, Content),
   index_text(URI, Content).
 
-pls_text_document_did_close(_Server, _Result, _Params).
+pls_text_document_did_close(_Server, _Result, Params) :-
+  Document = Params.textDocument,
+  URI = Document.uri,
+  clear_document_content(URI).
 
 % Shutdown
 

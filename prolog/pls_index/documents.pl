@@ -13,7 +13,8 @@
   get_document_item/2,
   clear_document_items/1,
 
-  get_document_content/2
+  get_document_content/2,
+  clear_document_content/1
   ]).
 
 :- dynamic document_property/2.
@@ -77,6 +78,16 @@ get_document_content(URI, Content) :-
 
 clear_document_content(URI) :-
   retractall(document_content(URI, _)).
+
+% 
+% xref support for documents being edited
+% 
+prolog:xref_open_source(URI, Stream) :-
+  get_document_content(URI, Content),
+  open_string(Content, Stream).
+  
+prolog:xref_close_source(_URI, Stream) :-
+  close(Stream).
 
 % 
 % document accessors
