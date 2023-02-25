@@ -113,7 +113,7 @@ pls_text_document_did_open(_Server, _Result, Params) :-
   },
   % Check its a prolog document
   store_document(URI, Language, Version, Content),
-  index_text(URI, Content).
+  index_text(URI).
 
 pls_text_document_did_change(_Server, _Result, Params) :-
   Document = Params.textDocument,
@@ -122,7 +122,7 @@ pls_text_document_did_change(_Server, _Result, Params) :-
   Content = Changes.text,
   get_document_property(URI, language(Language)),
   store_document(URI, Language, Document.version, Content),
-  index_text(URI, Content).
+  index_text(URI).
 
 pls_text_document_did_close(_Server, _Result, Params) :-
   Document = Params.textDocument,
