@@ -6,17 +6,19 @@
   disable_jsonrpc_logging/0
   ]).
 
+:- use_module(library(log4p)).
 :- use_module(library(http/json)).
 
 :- dynamic jsonrpc_log_directory/1.
 :- dynamic jsonrpc_log_enabled/0.
 
-set_jsonrpc_log_directory(Directory) :-
+set_jsonrpc_log_directory(LogDirectory) :-
   retractall(jsonrpc_log_directory(_)),
-  assertz(jsonrpc_log_directory(Directory)).
+  assertz(jsonrpc_log_directory(LogDirectory)),
+  debug("JSON-RPC log directory set to %w",[LogDirectory]).
 
-get_jsonrpc_log_directory(Directory) :-
-  jsonrpc_log_directory(Directory).
+get_jsonrpc_log_directory(LogDirectory) :-
+  jsonrpc_log_directory(LogDirectory).
 
 enable_jsonrpc_logging(LogDirectory) :-
   set_jsonrpc_log_directory(LogDirectory),
@@ -26,7 +28,8 @@ enable_jsonrpc_logging :-
   jsonrpc_log_enabled, !.
 
 enable_jsonrpc_logging :-
-  assertz(jsonrpc_log_enabled).
+  assertz(jsonrpc_log_enabled),
+  debug("JSON_RPC logging enabled").
 
 disable_jsonrpc_logging :-
   retractall(log_enabled).
