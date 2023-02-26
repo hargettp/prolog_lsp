@@ -133,17 +133,18 @@ pls_text_document_did_close(_Server, _Result, Params) :-
 
 pls_shutdown(Server, Result, _Params) :-  
   require_server_state(Server, initialized),
+  info("Method shutdown called"),
   % we don't actually shut anything down right now
   Result = _{},
   set_server_state(Server, shutting_down),
   info("Method shutdown called").
 
-% pls_exit(Server, _Params, Result) :-
-%   require_server_state(Server, shutting_down),
-%   info("Method exit called"),
-%   % we don't actually exit anything down right now
-%   Result = _{},
-%   halt.
+pls_exit(Server, _Params, Result) :-
+  require_server_state(Server, shutting_down),
+  info("Method exit called"),
+  % we don't actually exit anything down right now
+  Result = _{},
+  request_exit_server(Server).
 
 pls_workspace_symbols(_Server, Symbols, Query) :-
   workspace_symbols(Query, Symbols).

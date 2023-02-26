@@ -2,7 +2,9 @@
   handle_connection/3,
 
   echo/3,
-  crash/3
+  crash/3,
+
+  request_exit_server/1
 
 ]).
 
@@ -19,16 +21,25 @@
 % jsonrpc_connection(Server, Port, Peer, ServerThreadId)
 :- dynamic jsonrpc_connection/4.
 
-handle_connection(Server, Peer, StreamPair) :-
-  debug('handling connection for %w at %w',[Peer, Server]),
+handle_connection(ServerName, Peer, StreamPair) :-
+  mark_server_as_running(ServerName),
+  handle_messages(ServerName, Peer, StreamPair).
+
+handle_messages(ServerName, _Peer, _StreamPair) :-
+  \+ is_server_running(ServerName), 
+  info("Exiting server %s", [ServerName]),
+  !.
+  
+handle_messages(ServerName, Peer, StreamPair) :-
+  debug('handling connection for %w at %w',[Peer, ServerName]),
   stream_pair(StreamPair,In,Out),
   ( read_message(In, Message) ->
     ( 
       debug('Received request: ~%w', [Message]),
-      handle_message(Server, Peer,Out,Message)
+      handle_message(ServerName, Peer,Out,Message)
      ) ;
     parse_error(Out) ),
-  handle_connection(Server, Peer,StreamPair).
+    handle_messages(ServerName, Peer,StreamPair).
 
 handle_message(_, _Peer, Out, Message) :-
   info('handlng message %w',[Message]),
@@ -85,3 +96,22 @@ echo(_Server, Params, Params) :-
 crash(_Server, Params,Params) :-
   warn("Intentionally crashing"),
   throw(crash).
+
+is_server_running(ServerName) :-
+  server_running_flag(ServerName, RunningFlag),
+  get_flag(RunningFlag, true).
+
+mark_server_as_running(ServerName) :-
+  server_running_flag(ServerName, RunningFlag),
+  set_flag(RunningFlag, true).
+
+% Request that the indicated server stop running;
+% note that this is an asynchronous request and provides
+% no feedback.
+request_exit_server(ServerName) :-
+  server_running_flag(ServerName, RunningFlag),
+  set_flag(RunningFlag, false).
+
+server_running_flag(ServerName, RunningFlag) :-
+  atom_concat(ServerName, '_running', RunningFlag).
+

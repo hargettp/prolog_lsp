@@ -77,4 +77,14 @@ test(shutdown, [
     call_method(Connection,echo,[],[]), 
     jsonrpc_error(_{code: -32600, message: "Invalid state: required initialized, actual shutting_down"})).
 
+test(exit, [
+    forall(member(Type, [stdio])), 
+    setup(setup(Type, Connection)), 
+    cleanup(teardown(Type, Connection))
+    ]) :-
+  call_method(Connection,initialize,[],_),
+  notify_method(Connection, initialized,[]),
+  call_method(Connection,shutdown,[],_),
+  notify_method(Connection, exit,[]).
+
 :- end_tests(language_client).
