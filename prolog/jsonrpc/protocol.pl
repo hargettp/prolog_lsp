@@ -9,9 +9,14 @@
 :- use_module(library(http/json)).
 :- use_module(library(http/json_convert)).
 :- use_module(library(dcg/basics)).
+:- use_module(library(prolog_stack)).
 :- use_module(library(readutil)).
 
 :- use_module(library(log4p)).
+
+:- multifile
+  jsonrpc_protocol:on_message_read/1,
+  jsonrpc_protocol:on_message_write/1.
 
 read_message(In, Message) :-
   setup_and_call_cleanup(
@@ -32,7 +37,8 @@ read_message(Message) :-
       ),
     error(syntax_error(json(illegal_json)),_),
     fail
-    ).
+    ),
+  ignore(call_read_message_hooks(Message)).
 
 write_message(Out,Message) :-
   with_output_to(Out,write_message(Message)).
@@ -43,7 +49,8 @@ write_message(Message) :-
   write_content_length(Size),
   write_blank_line,
   write_content(Content),
-  flush_output.
+  flush_output,
+  ignore(call_write_message_hooks(Message)).
   
 read_blank_line(In) :-
   read_line_to_codes(In,Codes),
@@ -150,3 +157,25 @@ content_type -->
 
 blank_line -->
   whites.
+
+% --- hooks ---
+
+call_read_message_hooks(Message) :-
+  forall(
+    catch_with_backtrace(
+      ignore(jsonrpc_protocol:on_message_read(Message)),
+      Error,
+      print_message(error, Error)
+      ),
+    true
+    ).
+
+call_write_message_hooks(Message)  :-
+  forall(
+    catch_with_backtrace(
+      ignore(jsonrpc_protocol:on_message_write(Message)),
+      Error,
+      print_message(error, Error)
+      ),
+    true
+    ).
