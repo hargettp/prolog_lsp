@@ -136,10 +136,9 @@ pls_shutdown(Server, Result, _Params) :-
   info("Method shutdown called"),
   % we don't actually shut anything down right now
   Result = _{},
-  set_server_state(Server, shutting_down),
-  info("Method shutdown called").
+  set_server_state(Server, shutting_down).
 
-pls_exit(Server, _Params, Result) :-
+pls_exit(Server, Result, _Params) :-
   require_server_state(Server, shutting_down),
   info("Method exit called"),
   % we don't actually exit anything down right now

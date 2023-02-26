@@ -85,6 +85,7 @@ test(exit, [
   call_method(Connection,initialize,[],_),
   notify_method(Connection, initialized,[]),
   call_method(Connection,shutdown,[],_),
-  notify_method(Connection, exit,[]).
+  call_method(Connection,exit,[],_).
+  % notify_method(Connection, exit,[]).
 
 :- end_tests(language_client).
