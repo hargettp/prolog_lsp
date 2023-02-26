@@ -3,9 +3,11 @@
   get_jsonrpc_log_directory/1,
   enable_jsonrpc_logging/1,
   enable_jsonrpc_logging/0,
-  disable_jsonrpc_logging/0
+  disable_jsonrpc_logging/0,
+  clear_jsonrpc_logs/0
   ]).
 
+:- use_module(library(filesex)).
 :- use_module(library(log4p)).
 :- use_module(library(http/json)).
 
@@ -34,6 +36,10 @@ enable_jsonrpc_logging :-
 disable_jsonrpc_logging :-
   retractall(log_enabled).
 
+clear_jsonrpc_logs :-
+  get_jsonrpc_log_directory(LogDirectory),
+  delete_directory_contents(LogDirectory).
+
 % -- hooks ---
 
 jsonrpc_protocol:on_message_read(Message) :-
@@ -41,6 +47,8 @@ jsonrpc_protocol:on_message_read(Message) :-
 
 jsonrpc_protocol:on_message_write(Message) :-
   log_message(Message, response).
+
+% --- helpers ---
 
 log_message(Message, Kind) :-
   enabled,
