@@ -7,7 +7,7 @@
 
 :- use_module(library(log4p)).
 
-:- use_module(workspace).
+:- use_module(symbols).
 
 index_workspace(WorkspaceUri) :-
   findall(

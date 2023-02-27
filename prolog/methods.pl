@@ -6,7 +6,7 @@
 :- use_module(jsonrpc/server).
 :- use_module(code).
 :- use_module(errors).
-:- use_module(workspace).
+:- use_module(symbols).
 :- use_module(pls_index).
 
 % Initialization
@@ -23,6 +23,9 @@
 :- server_method(prolog_language_server, 'textDocument/didOpen', pls_text_document_did_open).
 :- server_method(prolog_language_server, 'textDocument/didChange', pls_text_document_did_change).
 :- server_method(prolog_language_server, 'textDocument/didClose', pls_text_document_did_close).
+
+% Other Text Document methods
+:- server_method(prolog_language_server, 'textDocument/documentSymbol', pls_document_symbols).
 
 % Shutdown
 :- server_method(prolog_language_server, shutdown, pls_shutdown).
@@ -129,6 +132,13 @@ pls_text_document_did_close(_Server, _Result, Params) :-
   URI = Document.uri,
   clear_document_content(URI).
 
+% Other text document
+
+pls_document_symbols(_Server, Result, Params) :-
+  Document = Params.textDocument,
+  URI = Document.uri,
+  document_symbols(URI, Result).
+
 % Shutdown
 
 pls_shutdown(Server, Result, _Params) :-  
@@ -155,5 +165,6 @@ server_capabilities(Capabilities) :-
       openClose: true,
       % This means the client sends the full content on each change
       change: 1
-    }
+    },
+    documentSymbolProvider: true
   }.

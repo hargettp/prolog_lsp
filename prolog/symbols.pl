@@ -1,4 +1,4 @@
-:- module(workspace, [
+:- module(pls_symbols, [
   workspace_source_file/2,
   workspace_file/2,
   workspace_file_type/2,
@@ -7,7 +7,9 @@
   workspace_symbols/2,
 
   workspace_symbol_info/2,
-  workspace_symbol_infos/2
+  workspace_symbol_infos/2,
+
+  document_symbols/2
   ]).
 
 :- use_module(library(uri)).
@@ -74,6 +76,29 @@ workspace_symbols(Query,Symbols) :-
 module_file(Module,File) :-
   file_base_name(File,Name),
   file_name_extension(Module,pl,Name).
+
+document_symbols(URI, SymbolInfos) :-
+  findall(SymbolInfo, document_symbol(URI, SymbolInfo), SymbolInfos).
+
+document_symbol(URI, SymbolInfo) :-
+  uri_file_name(URI,FileName),
+  xref_defined(FileName,Callable,local(StartLine)),
+  Callable =.. [Symbol|_],
+  EndLine is StartLine + 1,
+  symbol_kind(function,Kind),
+  xref_module(FileName, Module),
+  SymbolInfo = symbol_info{
+    name: Symbol,
+    kind: Kind,
+    location: {
+      uri: URI,
+      range: range{
+        start: position{line: StartLine, character: 0},
+        end: position{line: EndLine, character: 0}
+        }
+      },
+    container: Module
+    }.
 
 symbol_kind(file, 1).
 symbol_kind(module, 2).

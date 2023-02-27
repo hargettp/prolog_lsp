@@ -12,7 +12,7 @@
 :- reexport(jsonrpc/client).
 :- reexport(jsonrpc/logging).
 :- use_module(files).
-:- use_module(workspace).
+:- use_module(symbols).
 :- use_module(code).
 :- use_module(errors).
 :- use_module(methods).
