@@ -84,21 +84,18 @@ document_symbols(URI, SymbolInfos) :-
 document_symbol(URI, SymbolInfo) :-
   uri_file_name(URI,FileName),
   xref_defined(FileName,Callable,local(StartLine)),
-  Callable =.. [Symbol|_],
+  functor(Callable, Name, Arity),
   EndLine is StartLine + 1,
   symbol_kind(function,Kind),
   xref_module(FileName, Module),
   SymbolInfo = symbol_info{
     name: Symbol,
+    detail: Name/Arity,
     kind: Kind,
-    location: {
-      uri: URI,
-      range: range{
-        start: position{line: StartLine, character: 0},
-        end: position{line: EndLine, character: 0}
-        }
-      },
-    container: Module
+    range: range{
+      start: position{line: StartLine, character: 0},
+      end: position{line: EndLine, character: 0}
+      }
     }.
 
 symbol_kind(file, 1).
