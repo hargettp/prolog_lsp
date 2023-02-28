@@ -15,6 +15,7 @@
 :- use_module(library(uri)).
 
 :- use_module(files).
+:- use_module(pls_index).
 
 workspace_source_file(RootUri,SourceUri) :-
   workspace_file(RootUri,SourceUri),
@@ -42,10 +43,6 @@ workspace_file_type(doc,FileUri) :-
 
 workspace_file_type(other,_).
 
-workspace_symbol(_Query,Symbol) :-
-  xref_defined(_,Callable,local(_)),
-  Callable =.. [Symbol|_].
-
 workspace_symbol_info(_Query,SymbolInfo) :-
   xref_defined(File,Callable,local(StartLine)),
   uri_file_name(FileUri,File),
@@ -72,6 +69,10 @@ workspace_symbol_infos(Query,SymbolInfos) :-
 workspace_symbols(Query,Symbols) :-
   findall(Symbol,workspace_symbol(Query,Symbol),RawSymbols),
   sort(RawSymbols,Symbols).
+
+workspace_symbol(_Query,Symbol) :-
+  get_document_uri(URI),
+  document_symbol(URI, Symbol).
 
 module_file(Module,File) :-
   file_base_name(File,Name),
