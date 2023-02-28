@@ -166,6 +166,6 @@ server_capabilities(Capabilities) :-
       % This means the client sends the full content on each change
       change: 1
     },
-    documentSymbolProvider: true,
-    workspaceSymbolProvider: true
+    documentSymbolProvider: "true",
+    workspaceSymbolProvider: "true"
   }.
