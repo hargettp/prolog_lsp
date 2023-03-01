@@ -72,7 +72,8 @@ require_server_state(Server, Required) :-
 pls_initialize(Server, Result,Params) :-
   \+ get_server_state(Server, _),
   info("Method initialize called"),
-  info("Client capabilities: %w",[Params]),
+  message_json(Params, Json),
+  info("Client capabilities: %w",[Json]),
   server_capabilities(Capabilities),
   Result = _{
     capabilities: Capabilities

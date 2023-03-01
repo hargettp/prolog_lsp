@@ -11,7 +11,8 @@
 :- use_module(library(socket)).
 
 :- use_module(library(log4p)).
-:- use_module('./protocol').
+:- use_module('./protocol', except([message_json/2])).
+:- reexport(protocol, [message_json/2]).
 :- reexport('./methods').
 :- reexport('./errors').
 
