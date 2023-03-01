@@ -36,7 +36,6 @@ handle_messages(ServerName, Peer, StreamPair) :-
   stream_pair(StreamPair,In,Out),
   ( read_message(In, Message) ->
     ( 
-      debug('Received request: ~%w', [Message]),
       handle_message(ServerName, Peer,Out,Message)
      ) ;
     parse_error(Out) ),
