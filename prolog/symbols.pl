@@ -84,12 +84,12 @@ document_symbols(URI, SymbolInfos) :-
 document_symbol(URI, Symbol) :-
   uri_file_name(URI,FileName),
   xref_defined(FileName,Callable,local(StartLine)),
-  functor(Callable, Name, Arity),
+  functor(Callable, Name, _Arity),
   EndLine is StartLine + 1,
   symbol_kind(function,Kind),
   Symbol = symbol{
     name: Name,
-    detail: Name/Arity,
+    % detail: Name/Arity,
     kind: Kind,
     range: range{
       start: position{line: StartLine, character: 0},

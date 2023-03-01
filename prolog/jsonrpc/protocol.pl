@@ -3,7 +3,9 @@
   read_message/2,
 
   write_message/1,
-  write_message/2
+  write_message/2,
+
+  message_json/2
   ]).
 
 :- use_module(library(http/json)).
@@ -33,18 +35,21 @@ read_message(Message) :-
       read_header(Size),
       read_blank_line,
       read_content(Size, Content),
-      atom_json_dict(Content, Message, [])
+      message_json(Message, Content)
       ),
     error(syntax_error(json(illegal_json)),_),
     fail
     ),
   ignore(call_read_message_hooks(Message)).
 
+message_json(Message, Json) :-
+  atom_json_dict(Json, Message, []).
+
 write_message(Out,Message) :-
   with_output_to(Out,write_message(Message)).
 
 write_message(Message) :-
-  atom_json_dict(Content, Message, []),
+  message_json(Message, Content),
   string_length(Content, Size),
   write_content_length(Size),
   write_blank_line,

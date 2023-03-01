@@ -41,8 +41,9 @@ handle_messages(ServerName, Peer, StreamPair) :-
     parse_error(Out) ),
     handle_messages(ServerName, Peer,StreamPair).
 
-handle_message(_, _Peer, Out, Message) :-
-  info('handlng message %w',[Message]),
+handle_message(_, _Peer, Out, Message) :-  
+  message_json(Message, Json),
+  info('handlng message %w',[Json]),
   Message.get(jsonrpc) = "2.0" ->
     fail ;
     invalid_request(Out).
@@ -72,7 +73,8 @@ handle_request(Server, _Peer, Out, Request) :-
       Exception,
       dispatch_exception(Server,Request,Exception,Response)),
   write_message(Out,Response),
-  debug('Sent response: %w', [Response]),
+  message_json(Response, Json),
+  debug('Sent response: %w', [Json]),
   !.
 
 handle_request(_Server, _Peer, Out, _Request) :-
