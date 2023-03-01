@@ -81,15 +81,14 @@ module_file(Module,File) :-
 document_symbols(URI, SymbolInfos) :-
   findall(SymbolInfo, document_symbol(URI, SymbolInfo), SymbolInfos).
 
-document_symbol(URI, SymbolInfo) :-
+document_symbol(URI, Symbol) :-
   uri_file_name(URI,FileName),
   xref_defined(FileName,Callable,local(StartLine)),
   functor(Callable, Name, Arity),
   EndLine is StartLine + 1,
   symbol_kind(function,Kind),
-  xref_module(FileName, Module),
-  SymbolInfo = symbol_info{
-    name: Symbol,
+  Symbol = symbol{
+    name: Name,
     detail: Name/Arity,
     kind: Kind,
     range: range{
