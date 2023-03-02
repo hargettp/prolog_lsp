@@ -25,8 +25,8 @@ test(initialize,[
     setup(setup(Type, Connection)), 
     cleanup(teardown(Type, Connection))
     ]) :-
-  call_method(Connection,initialize,[],_R),
-  notify_method(Connection, initialized,[]).
+  call_method(Connection,initialize, _{},_R),
+  notify_method(Connection, initialized,_{}).
 
 % Utilitye
 
@@ -35,9 +35,9 @@ test(echo,[
     setup(setup(Type, Connection)), 
     cleanup(teardown(Type, Connection))
     ]) :-
-  call_method(Connection,initialize,[],_R),
-  notify_method(Connection, initialized,[]),
-  call_method(Connection,echo,[],[]).
+  call_method(Connection,initialize, _{},_R),
+  notify_method(Connection, initialized,_{}),
+  call_method(Connection,echo,_{},_{}).
 
 
 test(methods,[
@@ -45,15 +45,16 @@ test(methods,[
     setup(setup(Type, Connection)), 
     cleanup(teardown(Type, Connection))
     ]) :-
-  call_method(Connection,initialize,[],_R),
-  notify_method(Connection, initialized,[]),
-  call_method(Connection,methods,[],Actual),
+  call_method(Connection,initialize, _{},_R),
+  notify_method(Connection, initialized,_{}),
+  call_method(Connection,methods,_{},Actual),
   Expected = [
     "initialize",
     "initialized",
     "echo",
     "crash",
     "methods",
+    "$/setTrace",
     "textDocument/didOpen",
     "textDocument/didChange",
     "textDocument/didClose",
@@ -70,12 +71,12 @@ test(shutdown, [
     setup(setup(Type, Connection)), 
     cleanup(teardown(Type, Connection))
     ]) :-
-  call_method(Connection,initialize,[],_),
-  notify_method(Connection, initialized,[]),
-  call_method(Connection,shutdown,[],_),
+  call_method(Connection,initialize, _{},_),
+  notify_method(Connection, initialized,_{}),
+  call_method(Connection,shutdown,_{},_),
   % should get an error
   expect_error(
-    call_method(Connection,echo,[],[]), 
+    call_method(Connection,echo,_{},_{}), 
     jsonrpc_error(_{code: -32600, message: "Invalid state: required initialized, actual shutting_down"})).
 
 test(exit, [
@@ -83,10 +84,9 @@ test(exit, [
     setup(setup(Type, Connection)), 
     cleanup(teardown(Type, Connection))
     ]) :-
-  call_method(Connection,initialize,[],_),
-  notify_method(Connection, initialized,[]),
-  call_method(Connection,shutdown,[],_),
-  call_method(Connection,exit,[],_).
-  % notify_method(Connection, exit,[]).
+  call_method(Connection,initialize, _{},_),
+  notify_method(Connection, initialized,_{}),
+  call_method(Connection,shutdown,_{},_),
+  notify_method(Connection,exit,_{}).
 
 :- end_tests(language_client).

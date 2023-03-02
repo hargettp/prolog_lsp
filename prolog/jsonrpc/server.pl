@@ -43,7 +43,7 @@ handle_messages(ServerName, Peer, StreamPair) :-
 
 handle_message(_, _Peer, Out, Message) :-  
   message_json(Message, Json),
-  info('handlng message %w',[Json]),
+  debug('handlng message %w',[Json]),
   Message.get(jsonrpc) = "2.0" ->
     fail ;
     invalid_request(Out).
@@ -62,10 +62,7 @@ handle_batch(_, _, _ , []).
 handle_notification_or_request(Server, Peer, Out, Message) :-
   Message.get(id) = _Id
     -> handle_request(Server, Peer,Out,Message)
-    ; handle_notification(Server, Peer,Out,Message).
-
-handle_notification(Server, _Peer, _Out, Request) :-
-  dispatch_method(Server, Request.method, Request.params, _Result).
+    ; handle_notification(Server, Peer, Message).
 
 handle_request(Server, _Peer, Out, Request) :-
   catch(
@@ -80,16 +77,31 @@ handle_request(Server, _Peer, Out, Request) :-
 handle_request(_Server, _Peer, Out, _Request) :-
   invalid_request(Out).
 
+handle_notification(Server, _Peer, Notification) :-
+  catch(
+      dispatch_notification(Server, Notification.method, Notification.params),
+      Exception,
+      warn("Notification %w failed: %w", [Notification.method, Exception])
+    ),
+  debug("Handled notification %w", [Notification.method]).
+
 dispatch_method(Server, Id, MethodName, Params, Response) :-
   find_handler(Server, MethodName, Module:Handler),
   debug('found handler %w:%w for %w',[Module, Handler, Server]),
   apply(Module:Handler,[Server, Result, Params]),
-  Response = _{id: Id, result: Result }.
+  Response = _{id: Id, result: Result },
+  info("Method %w called", [MethodName]).
 
-dispatch_method(Server, MethodName, Params, Response) :-
+dispatch_method(Server, Id, MethodName, _Params, _Response) :-
+  warn("%w: Failed dispatchingr request %w method %w",[Server, Id, MethodName]).
+
+dispatch_notification(Server, MethodName, Params) :-
   find_handler(Server, MethodName, Module:Handler),
-  apply(Module:Handler,[Server, Result,Params]),
-  Response = _{result: Result }.
+  apply(Module:Handler,[Server, Params]),
+  info("Notification %w called", [MethodName]).
+
+dispatch_notification(Server, MethodName, _Params) :-
+  warn("%w: Failed dispatchingr notification %w",[Server, MethodName]).
 
 % simple method to echo parameters; good for testing
 echo(_Server, Params, Params) :-

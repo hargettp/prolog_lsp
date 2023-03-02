@@ -17,7 +17,7 @@
 :- server_method(prolog_language_server, echo, pls_echo).
 :- server_method(prolog_language_server, crash, pls_crash).
 :- server_method(prolog_language_server, methods, pls_methods).
-
+:- server_method(prolog_language_server, '$/setTrace', pls_trace).
 
 % Text Document Synchronization
 :- server_method(prolog_language_server, 'textDocument/didOpen', pls_text_document_did_open).
@@ -69,18 +69,19 @@ require_server_state(Server, Required) :-
 % Initialization
 % 
 
-pls_initialize(Server, Result,_Params) :-
+pls_initialize(Server, Result,Params) :-
+  TraceLevel = Params.get(trace, "off"),
+  set_trace_level(TraceLevel),
   \+ get_server_state(Server, _),
-  info("Method initialize called"),
   server_capabilities(Capabilities),
   Result = _{
-    capabilities: Capabilities
+    capabilities: Capabilities,
+    serverInfo: _{name: "Prolog"}
     },
   set_server_state(Server, initializing).
 
-pls_initialized(Server, _Result,_Params) :-
+pls_initialized(Server, _Params) :-
   require_server_state(Server, initializing),
-  info("Notification initialized called"),
   set_server_state(Server, initialized).
 
 % 
@@ -104,8 +105,12 @@ pls_methods(Server, Result, _Params) :-
     ),
   Result = Methods.
 
+pls_trace(_Server, Params) :-
+  TraveLevel = Params.value,
+  set_trace_level(TraveLevel).
+
 % Text Document sync
-pls_text_document_did_open(_Server, _Result, Params) :-
+pls_text_document_did_open(_Server, Params) :-
   Document = Params.textDocument,
   Document = _{
     uri: URI,
@@ -117,7 +122,7 @@ pls_text_document_did_open(_Server, _Result, Params) :-
   store_document(URI, Language, Version, Content),
   index_text(URI).
 
-pls_text_document_did_change(_Server, _Result, Params) :-
+pls_text_document_did_change(_Server, Params) :-
   Document = Params.textDocument,
   Changes = Params.contentChanges,
   URI = Document.uri,
@@ -126,7 +131,7 @@ pls_text_document_did_change(_Server, _Result, Params) :-
   store_document(URI, Language, Document.version, Content),
   index_text(URI).
 
-pls_text_document_did_close(_Server, _Result, Params) :-
+pls_text_document_did_close(_Server, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   clear_document_content(URI).
@@ -142,22 +147,20 @@ pls_document_symbols(_Server, Result, Params) :-
 
 pls_shutdown(Server, Result, _Params) :-  
   require_server_state(Server, initialized),
-  info("Method shutdown called"),
   % we don't actually shut anything down right now
   Result = _{},
   set_server_state(Server, shutting_down).
 
-pls_exit(Server, Result, _Params) :-
+pls_exit(Server, _Params) :-
   require_server_state(Server, shutting_down),
-  info("Method exit called"),
   % we don't actually exit anything down right now
-  Result = _{},
   request_exit_server(Server).
 
 pls_workspace_symbols(_Server, Symbols, Query) :-
   workspace_symbols(Query, Symbols).
 
-% common data structures
+% --- helpers ---
+
 server_capabilities(Capabilities) :-
   Capabilities = _{
     textDocumentSync: _{
@@ -167,3 +170,12 @@ server_capabilities(Capabilities) :-
     },
     documentSymbolProvider: true
   }.
+
+set_trace_level("off") :-
+  log4p:set_log_level(info,_).
+
+set_trace_level("messages") :-
+  log4p:set_log_level(debug,_).
+
+set_trace_level("verbose") :-
+  log4p:set_log_level(trace,_).
