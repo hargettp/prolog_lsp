@@ -113,12 +113,12 @@ logging_enabled :-
 trace_message(Message, request) :-
   tracing_enabled,
   atom_json_dict(Content, Message, [as(string)]),
-  log4p:debug('received %w', [Content]).
+  log4p:info('received %w', [Content]).
 
 trace_message(Message, response) :-
   tracing_enabled,
   atom_json_dict(Content, Message, [as(string)]),
-  log4p:debug('sent %w', [Content]).
+  log4p:info('sent %w', [Content]).
 
 tracing_enabled :-
   jsonrpc_trace_enabled.
