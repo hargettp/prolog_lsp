@@ -9,7 +9,9 @@
   clear_jsonrpc_logs/0,
 
   enable_jsonrpc_tracing/0,
-  disable_jsonrpc_tracing/0
+  disable_jsonrpc_tracing/0,
+  get_jsonrpc_tracing/1,
+  set_jsonrpc_tracing/1
   ]).
 
 :- use_module(library(filesex)).
@@ -54,6 +56,17 @@ enable_jsonrpc_tracing :-
 disable_jsonrpc_tracing :-
   retractall(jsonrpc_trace_enabled),
   debug("JSON_RPC tracing disabled").
+
+get_jsonrpc_tracing(enabled) :-
+  tracing_enabled, !.
+
+get_jsonrpc_tracing(disabled).
+
+set_jsonrpc_tracing(enabled) :-
+  enable_jsonrpc_tracing.
+
+set_jsonrpc_tracing(disabled) :-
+  disable_jsonrpc_tracing.
 
 % -- hooks ---
 
@@ -100,12 +113,12 @@ logging_enabled :-
 trace_message(Message, request) :-
   tracing_enabled,
   atom_json_dict(Content, Message, [as(string)]),
-  debug('received %w', [Content]).
+  log4p:debug('received %w', [Content]).
 
 trace_message(Message, response) :-
   tracing_enabled,
   atom_json_dict(Content, Message, [as(string)]),
-  debug('sent %w', [Content]).
+  log4p:debug('sent %w', [Content]).
 
 tracing_enabled :-
   jsonrpc_trace_enabled.
