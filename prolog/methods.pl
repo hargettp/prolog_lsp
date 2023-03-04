@@ -4,6 +4,7 @@
 
 :- use_module(library(log4p)).
 :- use_module(jsonrpc/server).
+:- use_module(capabilities).
 :- use_module(code).
 :- use_module(errors).
 :- use_module(symbols).
@@ -160,16 +161,6 @@ pls_workspace_symbols(_Server, Symbols, Query) :-
   workspace_symbols(Query, Symbols).
 
 % --- helpers ---
-
-server_capabilities(Capabilities) :-
-  Capabilities = _{
-    textDocumentSync: _{
-      openClose: true,
-      % This means the client sends the full content on each change
-      change: 1
-    },
-    documentSymbolProvider: true
-  }.
 
 set_trace_level("off") :-
   log4p:set_log_level(info,_).
