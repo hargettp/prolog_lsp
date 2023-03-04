@@ -8,7 +8,7 @@
 :- use_module('./methods').
 
 run_test_stdio_server :-
-  log4p:set_log_level(debug, _),
+  log4p:set_global_log_level(debug),
   enable_jsonrpc_tracing,
   create_stdio_server(jsonrpc_client_test, Server),
   serve_messages(Server).

@@ -163,10 +163,10 @@ pls_workspace_symbols(_Server, Symbols, Query) :-
 % --- helpers ---
 
 set_trace_level("off") :-
-  log4p:set_log_level(info,_).
+  log4p:set_global_log_level(info).
 
 set_trace_level("messages") :-
-  log4p:set_log_level(debug,_).
+  log4p:set_global_log_level(debug).
 
 set_trace_level("verbose") :-
-  log4p:set_log_level(trace,_).
+  log4p:set_global_log_level(trace).
