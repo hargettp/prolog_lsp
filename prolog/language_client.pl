@@ -9,7 +9,7 @@
   exit/1
   ]).
 
-:- reexport(jsonrpc/client).
+:- reexport('./jsonrpc/client').
 
 stdio_language_connector(stdio(Program, Args)) :-
   Program = path(swipl),

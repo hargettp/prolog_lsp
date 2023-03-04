@@ -67,12 +67,28 @@ workspace_symbol_infos(Query,SymbolInfos) :-
   findall(SymbolInfo,workspace_symbol_info(Query,SymbolInfo),SymbolInfos).
 
 workspace_symbols(Query,Symbols) :-
-  findall(Symbol,workspace_symbol(Query,Symbol),RawSymbols),
-  sort(RawSymbols,Symbols).
+  findall(Symbol,workspace_symbol(Query,Symbol),Symbols).
 
-workspace_symbol(_Query,Symbol) :-
+workspace_symbol(Query,Symbol) :-
   get_document_uri(URI),
-  document_symbol(URI, Symbol).
+  uri_file_name(URI,FileName),
+  xref_defined(FileName,Callable,local(StartLine)),
+  functor(Callable, Name, _Arity),
+  atom_concat(Query,_,Name),
+  EndLine is StartLine + 1,
+  symbol_kind(function,Kind),
+  Symbol = symbol{
+    name: Name,
+    % detail: Name/Arity,
+    kind: Kind,
+    location: _{
+      uri: URI,
+      range: range{
+        start: position{line: StartLine, character: 0},
+        end: position{line: EndLine, character: 0}
+        }
+      }
+    }.
 
 module_file(Module,File) :-
   file_base_name(File,Name),

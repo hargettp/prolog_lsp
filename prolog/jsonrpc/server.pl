@@ -9,6 +9,7 @@
 ]).
 
 :- use_module(library(socket)).
+:- use_module(library(prolog_stack)).
 
 :- use_module(library(log4p)).
 :- use_module('./protocol', except([message_json/2])).
@@ -65,7 +66,7 @@ handle_notification_or_request(Server, Peer, Out, Message) :-
     ; handle_notification(Server, Peer, Message).
 
 handle_request(Server, _Peer, Out, Request) :-
-  catch(
+  catch_with_backtrace(
       dispatch_method(Server, Request.id, Request.method, Request.params, Response),
       Exception,
       dispatch_exception(Server,Request,Exception,Response)),

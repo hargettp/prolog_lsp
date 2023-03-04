@@ -33,5 +33,5 @@
 % 
 % Connectors
 % 
-:- reexport(connectors/stdio).
-:- reexport(connectors/tcp).
+:- reexport('./connectors/stdio').
+:- reexport('./connectors/tcp').

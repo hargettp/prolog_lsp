@@ -8,9 +8,9 @@
 
 :- use_module(jsonrpc/protocol).
 :- use_module(jsonrpc/connectors).
-:- reexport(jsonrpc/server).
-:- reexport(jsonrpc/client).
-:- reexport(jsonrpc/logging).
+:- reexport('./jsonrpc/server').
+:- reexport('./jsonrpc/client').
+:- reexport('./jsonrpc/logging').
 :- use_module(files).
 :- use_module(symbols).
 :- use_module(code).

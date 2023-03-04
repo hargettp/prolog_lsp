@@ -157,8 +157,8 @@ pls_exit(Server, _Params) :-
   % we don't actually exit anything down right now
   request_exit_server(Server).
 
-pls_workspace_symbols(_Server, Symbols, Query) :-
-  workspace_symbols(Query, Symbols).
+pls_workspace_symbols(_Server, Symbols, Params) :-
+  workspace_symbols(Params.query, Symbols).
 
 % --- helpers ---
 
