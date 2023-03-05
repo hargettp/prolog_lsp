@@ -72,23 +72,30 @@ workspace_symbols(Query,Symbols) :-
 workspace_symbol(Query,Symbol) :-
   get_document_uri(URI),
   uri_file_name(URI,FileName),
-  xref_defined(FileName,Callable,local(StartLine)),
+  % xref_defined(FileName,Callable,local(StartLine)),
+  symbol_range(FileName, Callable, Range),
   functor(Callable, Name, _Arity),
   atom_concat(Query,_,Name),
-  EndLine is StartLine + 1,
+  % EndLine is StartLine + 1,
   symbol_kind(function,Kind),
   Symbol = symbol{
     name: Name,
-    % detail: Name/Arity,
     kind: Kind,
     location: _{
       uri: URI,
-      range: range{
-        start: position{line: StartLine, character: 0},
-        end: position{line: EndLine, character: 0}
-        }
+      range: Range
       }
     }.
+
+symbol_range(FileName, Callable, Range) :-
+  xref_defined(FileName,Callable,local(StartLine1)),
+  StartLine is StartLine1 - 1,
+  EndLine is StartLine + 1,
+  Range = _{
+        start: position{line: StartLine, character: 0},
+        end: position{line: EndLine, character: 0}
+        }.
+
 
 module_file(Module,File) :-
   file_base_name(File,Name),
@@ -99,18 +106,18 @@ document_symbols(URI, SymbolInfos) :-
 
 document_symbol(URI, Symbol) :-
   uri_file_name(URI,FileName),
-  xref_defined(FileName,Callable,local(StartLine)),
-  functor(Callable, Name, _Arity),
-  EndLine is StartLine + 1,
+  % xref_defined(FileName,Callable,local(StartLine)),
+  symbol_range(FileName, Callable, Range),
+  functor(Callable, Name, Arity),
+  % EndLine is StartLine + 1,
   symbol_kind(function,Kind),
+  swritef(Detail,"%w/%w",[Name,Arity]),
   Symbol = symbol{
     name: Name,
-    % detail: Name/Arity,
+    detail: Detail,
     kind: Kind,
-    range: range{
-      start: position{line: StartLine, character: 0},
-      end: position{line: EndLine, character: 0}
-      }
+    range: Range,
+    selectionRange: Range
     }.
 
 symbol_kind(file, 1).
