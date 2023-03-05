@@ -4,7 +4,7 @@
 
 :- use_module(library(log4p)).
 :- use_module('../prolog/jsonrpc/connectors').
-:- use_module('../prolog/jsonrpc/logging').
+:- use_module('../prolog/jsonrpc/hooks').
 :- use_module('./methods').
 
 run_test_stdio_server :-
