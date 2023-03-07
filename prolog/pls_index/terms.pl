@@ -1,9 +1,7 @@
 :- module(pls_index_terms, [
   ]).
 
-% 
-% helpers
-% 
+:- use_module(documents).
 
 % Given a document URI, successive calls will iterate
 % over *all* the compound and atomic subterms inside
