@@ -7,3 +7,4 @@ packager('Phil Hargett', 'phil@haphazardhouse.net').
 home('https://github.com/hargettp/prolog_lsp').
 provides(prolog_lsp).
 requires(log4p).
+requires(lambda_abstractions).

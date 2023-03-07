@@ -10,6 +10,7 @@ server_capabilities(Capabilities) :-
       change: 1
     },
     workspaceSymbolProvider: true,
-    documentSymbolProvider: true
+    documentSymbolProvider: true,
+    hoverProvider: true
   }.
 

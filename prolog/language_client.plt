@@ -77,6 +77,7 @@ test(methods,[
     "textDocument/didChange",
     "textDocument/didClose",
     "textDocument/documentSymbol",
+    "textDocument/hover",
     "shutdown",
     "exit",
     "workspace/symbol"

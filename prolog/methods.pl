@@ -25,8 +25,9 @@
 :- server_method(prolog_language_server, 'textDocument/didChange', pls_text_document_did_change).
 :- server_method(prolog_language_server, 'textDocument/didClose', pls_text_document_did_close).
 
-% Other Text Document methods
+% Language features
 :- server_method(prolog_language_server, 'textDocument/documentSymbol', pls_document_symbols).
+:- server_method(prolog_language_server, 'textDocument/hover', pls_hover).
 
 % Shutdown
 :- server_method(prolog_language_server, shutdown, pls_shutdown).
@@ -143,6 +144,9 @@ pls_document_symbols(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   document_symbols(URI, Result).
+
+pls_hover(_Server, Result, _Param) :-
+  Result = null.
 
 % Shutdown
 
