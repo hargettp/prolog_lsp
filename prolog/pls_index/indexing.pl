@@ -9,7 +9,6 @@
   index_defined/3
   ]).
 
-:- use_module(library(lambda_abstractions)).
 :- use_module(library(log4p)).
 :- use_module(library(option)).
 :- use_module(library(prolog_source)).
