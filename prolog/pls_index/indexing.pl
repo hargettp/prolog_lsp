@@ -6,7 +6,8 @@
   index_roots/1,
   index_root/1,
 
-  index_defined/3
+  index_defined/3,
+  index_lines/1
   ]).
 
 :- use_module(library(log4p)).
@@ -68,29 +69,36 @@ prolog_extension(Extension) :-
     prolog
     ]).
 
-
-document_line_positions(URI, LinePositions) :-
-  findall(Line-Position,document_line_position(URI, Line, Position), LinePositions).
-
-document_line_position(URI, Line, Position) :-
-  get_document_content(URI, Content),
-  !,
-  setup_call_cleanup(
-    open_string(Content, In),
-    stream_line_position(In, Line, Position),
-    close(In)
-    ).
+index_lines(URI) :-
+  clear_document_lines(URI),
+  clear_document_line_count(URI),
+  forall(
+    document_line_position(URI, Line, Position), 
+    add_document_line(URI, Line, Position)
+    ),
+  findall(Line, get_document_line_position(URI, Line, _), Lines),
+  max_list(Lines, LineCount),
+  set_document_line_count(URI, LineCount).
 
 document_line_position(URI, Line, Position) :-
-  uri_file_name(URI, FileName),
-  file_line_position(FileName, Line, Position).
-
-file_line_position(FileName, Line, Position) :-
-  setup_call_cleanup(
-    open(FileName, read, In),
-    stream_line_position(In, Line, Position),
-    close(In)
+  with_content(URI, In, 
+    stream_line_position(In, Line, Position)
     ).
+%   get_document_content(URI, Content),
+%   !,
+%   setup_call_cleanup(
+%     open_string(Content, In),
+%     stream_line_position(In, Line, Position),
+%     close(In)
+%     ).
+
+% document_line_position(URI, Line, Position) :-
+%   uri_file_name(URI, FileName),
+%   setup_call_cleanup(
+%     open(FileName, read, In),
+%     stream_line_position(In, Line, Position),
+%     close(In)
+%     ).
 
 stream_line_position(_In, 1, 0).
 stream_line_position(In, Line, Position) :-
