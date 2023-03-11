@@ -84,21 +84,6 @@ document_line_position(URI, Line, Position) :-
   with_content(URI, In, 
     stream_line_position(In, Line, Position)
     ).
-%   get_document_content(URI, Content),
-%   !,
-%   setup_call_cleanup(
-%     open_string(Content, In),
-%     stream_line_position(In, Line, Position),
-%     close(In)
-%     ).
-
-% document_line_position(URI, Line, Position) :-
-%   uri_file_name(URI, FileName),
-%   setup_call_cleanup(
-%     open(FileName, read, In),
-%     stream_line_position(In, Line, Position),
-%     close(In)
-%     ).
 
 stream_line_position(_In, 1, 0).
 stream_line_position(In, Line, Position) :-
