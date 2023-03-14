@@ -16,6 +16,7 @@
 :- use_module(library(uri)).
 
 :- use_module(documents).
+:- use_module(terms).
 
 with_input_from(String, Goal) :-
   setup_and_call_cleanup(
@@ -34,28 +35,32 @@ start_index_roots(Roots) :-
   thread_create(index_roots(Roots), _Id, [detached(true)]).
 
 index_roots(Roots) :-
-  info("Starting indexing of files in all roots: %w", [Roots]),
+  debug("Starting indexing of files in all roots: %w", [Roots]),
   forall(member(Root, Roots), index_root(Root)),
-  info("Finished indexing of files in all roots: %w", [Roots]).
+  debug("Finished indexing of files in all roots: %w", [Roots]).
 
 index_root(URI) :-
-  info("Starting index of files in root %w", [URI]),
+  debug("Starting index of files in root %w", [URI]),
   uri_file_name(URI, Directory),
   directory_source_files(Directory, Files, [recursive(true)]),
   forall(member(File, Files), index_file(File)),
-  info("Finished index of files in root %w", [URI]).
+  debug("Finished index of files in root %w", [URI]).
 
 index_file(Source) :-
+  debug("Starting index of file %w", [Source]),
   file_name_extension(_Base, Extension, Source),
   prolog_extension(Extension),
   uri_file_name(URI, Source),
-  index_text(URI).
+  index_text(URI),
+  debug("Finished index of file %w", [Source]).
 
 index_text(URI) :-
   uri_file_name(URI,FileName),
-  xref_source(FileName),
   set_document_uri(URI), 
-    !.
+  xref_source(FileName),
+  index_lines(URI),
+  index_terms(URI),
+  !.
 
 index_defined(URI, Defined, How) :-
   uri_file_name(URI, FileName),

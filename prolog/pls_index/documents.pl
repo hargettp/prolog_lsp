@@ -16,8 +16,8 @@
   clear_document_content/1,
   with_content/3,
 
-  add_document_item/2,
-  get_document_item/2,
+  add_document_item/3,
+  get_document_item/3,
   clear_document_item/2,
   clear_document_items/1,
 
@@ -31,7 +31,7 @@
   ]).
 
 :- dynamic document_content/2.
-:- dynamic document_item/2.
+:- dynamic document_item/3.
 :- dynamic document_line_count/2.
 :- dynamic document_line_position/3.
 :- dynamic document_property/2.
@@ -119,14 +119,33 @@ clear_content(URI) :-
   clear_document_content(URI).
 
 % --- items --
-add_document_item(URI, Value) :-
-  assertz(document_item(URI, Value)).
+add_document_item(URI, Range, Value) :-
+  assertz(document_item(URI, Range, Value)).
 
-get_document_item(URI, Value) :-
-  document_item(URI, Value).
+% Get a document item based on its position
+get_document_item(URI, Position, Item) :-
+  nonvar(Position),
+  Line = Position.get(line),
+  Character = Position.get(character),
+  % Must have ground actual position
+  ground(Line),ground(Character),
+  get_document_item(
+    URI,
+    _{
+      start: _{line: Line, character: FromCharacter},
+      end:  _{line: _ToLine, character: ToCharacter}
+      },
+    Item
+    ),
+  Character >= FromCharacter,
+  Character =< ToCharacter.
+
+% Get a document item by unifying with URI, Range, and Value
+get_document_item(URI, Range, Value) :-
+  document_item(URI, Range, Value).
 
 clear_document_item(URI, Value) :-
-  retractall(document_item(URI, Value)).
+  retractall(document_item(URI, _Range, Value)).
 
 clear_document_items(URI) :-
   clear_document_item(URI, _).

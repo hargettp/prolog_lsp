@@ -11,6 +11,7 @@ server_capabilities(Capabilities) :-
     },
     workspaceSymbolProvider: true,
     documentSymbolProvider: true,
-    hoverProvider: true
+    hoverProvider: true,
+    referencesProvider: true
   }.
 
