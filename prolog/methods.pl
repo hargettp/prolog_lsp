@@ -153,48 +153,10 @@ pls_hover(_Server, Result, _Param) :-
 pls_references(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
-  RequestPosition = Params.position,
-  Line is RequestPosition.line + 1,
-  Position = _{
-    line: Line,
-    character: RequestPosition.character
-    },
-  findall(
-    Reference, 
-    ( definition_reference(URI, Position, Reference) ; call_reference(URI, Position, Reference) ), 
-    References
-    ),
+  Position = Params.position,
+  references_for_position(URI, Position, References),
   info("Found in %w references %q",[URI, References]),
   Result = References.
-
-definition_reference(URI, Position, Reference) :-
-  get_document_item(URI, Position, defines(Callable)),
-  callable_reference(URI, Callable, Reference).
-
-call_reference(URI, Position, Reference) :-
-  get_document_item(URI, Position, references(_Caller, local, Callable)),
-  callable_reference(URI, Callable, Reference).
-
-call_reference(URI, Position, Reference) :-
-  get_document_item(URI, Position, references(_Caller, imported(OriginURI), Callable)),
-  callable_reference(OriginURI, Callable, Reference).
-
-callable_reference(URI, Callable, Reference) :-
-  get_document_item(URI, _Range, defines(Callable)),
-  RefURI = URI,
-  get_document_item(RefURI, RefRange, references(_Caller, local, Callable)),
-  Reference = _{
-    uri: RefURI,
-    range: RefRange
-  }.
-
-callable_reference(URI, Callable, Reference) :-
-  get_document_item(URI, _Range, defines(Callable)),
-  get_document_item(RefURI, RefRange, references(_Caller, imported(URI), Callable)),
-  Reference = _{
-    uri: RefURI,
-    range: RefRange
-  }.
 
 % Shutdown
 

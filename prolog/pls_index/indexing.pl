@@ -96,7 +96,8 @@ stream_line_position(In, Line, Position) :-
   read_line_to_string(In, Text),
   ( Text \== end_of_file
     -> (
-        line_count(In, Line),
+        line_count(In, Count),
+        Line is Count - 1,
         character_count(In, Position)
       )
     ; ( !, fail)
