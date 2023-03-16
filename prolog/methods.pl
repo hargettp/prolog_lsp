@@ -5,7 +5,6 @@
 :- use_module(library(log4p)).
 :- use_module(jsonrpc/server).
 :- use_module(capabilities).
-:- use_module(code).
 :- use_module(errors).
 :- use_module(symbols).
 :- use_module(pls_index).

@@ -13,7 +13,6 @@
 :- reexport('./jsonrpc/hooks').
 :- use_module(files).
 :- use_module(symbols).
-:- use_module(code).
 :- use_module(errors).
 :- use_module(methods).
 :- reexport(language_server).
