@@ -73,13 +73,10 @@ index_goal(URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal)
   index_goal(URI, Caller, ContentPos, Goal).
 
 index_goal(URI, Caller, term_position(_From, _To, FFrom, FTo, _Subpos), Goal) :-
-  uri_file_name(URI, FileName),
-  xref_defined(FileName, Goal, How),
   functor_range(URI, FFrom, FTo, Range),
   functor(Goal, Name, Arity),
-  Reference = Name/Arity,
-  context_for_reference(How, Context),!,
-  Item = references(Caller, Context, Reference),
+  Callable = Name/Arity,
+  Item = references(Caller, Callable),
   debug("Adding item %w",[Item]),
   add_document_item(URI, Range, Item).
 
@@ -118,16 +115,3 @@ term_range(URI, From, To, Range) :-
     }.
 
 term_position_subpos(term_position(_From, _To, _FFrom, _FTo, Subpos), Subpos).
-
-context_for_reference(local(_), local) :- !.
-
-context_for_reference(imported(FileName), imported(URI)) :-
-  uri_file_name(URI, FileName),
-  !.
-  
-context_for_reference(_URI, How, How).
-
-resolve_file_name(URI, Referred, ReferredURI) :-
-  uri_file_name(URI, FileName),
-  absolute_file_name(Referred, ReferredFileName, [relative_to(FileName)]),
-  uri_file_name(ReferredURI, ReferredFileName).

@@ -78,17 +78,6 @@ clear_document_content(URI) :-
   retractall(document_content(URI, _)).
 
 % 
-% xref support for documents being edited
-% 
-prolog:xref_open_source(FileName, Stream) :-
-  uri_file_name(URI, FileName),
-  get_document_content(URI, Content),
-  open_string(Content, Stream).
-  
-prolog:xref_close_source(_FileName, Stream) :-
-  close(Stream).
-
-% 
 % document accessors
 % 
 
@@ -160,11 +149,11 @@ with_content(URI, In, Module:Goal) :-
     close(In)
     ).
 
-with_content(URI, In, Goal) :-
+with_content(URI, In, Module:Goal) :-
   uri_file_name(URI, FileName),
   setup_call_cleanup(
     open(FileName, read, In),
-    call(Goal),
+    call(Module:Goal),
     close(In)
     ).
 

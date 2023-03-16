@@ -6,7 +6,7 @@
 :- use_module(documents).
 
 definition_for_position(URI, Position, References) :-
-  get_document_item(URI, Position, references(_Caller, _How, Callable)),
+  get_document_item(URI, Position, references(_Caller, Callable)),
   info("Found %w for callable %w",[Position, Callable]),
   findall(
     _{

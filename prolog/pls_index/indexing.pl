@@ -6,7 +6,6 @@
   index_roots/1,
   index_root/1,
 
-  index_defined/3,
   index_lines/1
   ]).
 
@@ -61,10 +60,6 @@ index_text(URI) :-
   index_lines(URI),
   index_terms(URI),
   !.
-
-index_defined(URI, Defined, How) :-
-  uri_file_name(URI, FileName),
-  xref_defined(FileName, Defined, How).
   
 prolog_extension(Extension) :-
   member(Extension, [
