@@ -29,6 +29,7 @@
 :- server_method(prolog_language_server, 'textDocument/documentSymbol', pls_document_document_symbol).
 :- server_method(prolog_language_server, 'textDocument/hover', pls_hover).
 :- server_method(prolog_language_server, 'textDocument/references', pls_text_document_references).
+:- server_method(prolog_language_server, 'textDocument/definition', pls_text_document_definition).
 
 % Shutdown
 :- server_method(prolog_language_server, shutdown, pls_shutdown).
@@ -148,6 +149,15 @@ pls_document_document_symbol(_Server, Result, Params) :-
 
 pls_hover(_Server, Result, _Param) :-
   Result = null.
+
+pls_text_document_definition(_Server, Result, Params) :-
+  Document = Params.textDocument,
+  URI = Document.uri,
+  Position = Params.position,
+  info("Lookingfrom %w for definition at %q",[URI, Position]),
+  definition_for_position(URI, Position, References),
+  info("Found from %w definition %q",[URI, References]),
+  Result = References.
 
 % Find references for defined predicates
 pls_text_document_references(_Server, Result, Params) :-
