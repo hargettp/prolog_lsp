@@ -26,9 +26,9 @@
 :- server_method(prolog_language_server, 'textDocument/didClose', pls_text_document_did_close).
 
 % Language features
-:- server_method(prolog_language_server, 'textDocument/documentSymbol', pls_document_symbols).
+:- server_method(prolog_language_server, 'textDocument/documentSymbol', pls_document_document_symbol).
 :- server_method(prolog_language_server, 'textDocument/hover', pls_hover).
-:- server_method(prolog_language_server, 'textDocument/references', pls_references).
+:- server_method(prolog_language_server, 'textDocument/references', pls_text_document_references).
 
 % Shutdown
 :- server_method(prolog_language_server, shutdown, pls_shutdown).
@@ -141,7 +141,7 @@ pls_text_document_did_close(_Server, Params) :-
 
 % Other text document
 
-pls_document_symbols(_Server, Result, Params) :-
+pls_document_document_symbol(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   document_symbols(URI, Result).
@@ -150,7 +150,7 @@ pls_hover(_Server, Result, _Param) :-
   Result = null.
 
 % Find references for defined predicates
-pls_references(_Server, Result, Params) :-
+pls_text_document_references(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
