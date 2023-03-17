@@ -97,6 +97,12 @@ clear_document_uri(URI) :-
 
 % -- content --
 
+%! set_content(+URI, +Content) is nondet.
+% 
+% Record content for the specified URI; usually
+% for temporary available of content for a document
+% where editing is underway
+%
 set_content(URI, Content) :-
   clear_language(URI),
   assertz(document_content(URI, Content)).
@@ -111,7 +117,12 @@ clear_content(URI) :-
 add_document_item(URI, Range, Value) :-
   assertz(document_item(URI, Range, Value)).
 
-% Get a document item based on its position
+%! get_document_item(?URI, +Position, -Item) is nondet.
+%! get_document_item(?URI, ?Range, ?Item) is nondet.
+%
+% When called in its first form, get a document item based on its position,
+% otherwise a return document item by unifying with URI, Range, and Item .
+%
 get_document_item(URI, Position, Item) :-
   nonvar(Position),
   Line = Position.get(line),
@@ -129,7 +140,6 @@ get_document_item(URI, Position, Item) :-
   Character >= FromCharacter,
   Character =< ToCharacter.
 
-% Get a document item by unifying with URI, Range, and Value
 get_document_item(URI, Range, Value) :-
   document_item(URI, Range, Value).
 

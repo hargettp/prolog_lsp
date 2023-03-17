@@ -19,11 +19,15 @@ index_terms(URI) :-
 index_term(URI) :-
   with_content(URI, In, (
     repeat,
-    read_term(In, Term, [subterm_positions(Pos), comments(CommentPos)]),
+    read_term(In, Term, [
+      term_position(TermPos),
+      subterm_positions(SubPos), 
+      comments(CommentPos)
+      ]),
     ( Term \== end_of_file
       -> (
-          index_term(URI, Pos, Term),
-          index_comments(URI, Pos, Term, CommentPos)
+          index_term(URI, SubPos, Term),
+          index_comments(URI, CommentPos, TermPos)
           )
       ; (!, fail)
       )
@@ -68,9 +72,8 @@ index_term(URI, Pos, (Head :- Body)) :-
   index_goals(URI, Caller, BodyPos, Body),
   !.
 
-index_comments(URI, TermPos, (Head :- _Body), CommentPos) :-
-  functor_range(URI, TermPos, Range),
-  index_docs(URI, Range, Head, CommentPos),
+index_comments(URI, CommentPos, TermPos) :-
+  index_docs(URI, CommentPos, TermPos),
   !.
 
 index_comments(_URI, _TermPos, _Term, _CommentPos).
