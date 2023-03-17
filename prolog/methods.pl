@@ -5,7 +5,6 @@
 :- use_module(library(log4p)).
 :- use_module(jsonrpc/server).
 :- use_module(capabilities).
-:- use_module(code).
 :- use_module(errors).
 :- use_module(symbols).
 :- use_module(pls_index).
@@ -25,8 +24,11 @@
 :- server_method(prolog_language_server, 'textDocument/didChange', pls_text_document_did_change).
 :- server_method(prolog_language_server, 'textDocument/didClose', pls_text_document_did_close).
 
-% Other Text Document methods
-:- server_method(prolog_language_server, 'textDocument/documentSymbol', pls_document_symbols).
+% Language features
+:- server_method(prolog_language_server, 'textDocument/documentSymbol', pls_document_document_symbol).
+:- server_method(prolog_language_server, 'textDocument/hover', pls_text_document_hover).
+:- server_method(prolog_language_server, 'textDocument/references', pls_text_document_references).
+:- server_method(prolog_language_server, 'textDocument/definition', pls_text_document_definition).
 
 % Shutdown
 :- server_method(prolog_language_server, shutdown, pls_shutdown).
@@ -139,10 +141,37 @@ pls_text_document_did_close(_Server, Params) :-
 
 % Other text document
 
-pls_document_symbols(_Server, Result, Params) :-
+pls_document_document_symbol(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   document_symbols(URI, Result).
+
+pls_text_document_hover(_Server, Result, Params) :-
+  Document = Params.textDocument,
+  URI = Document.uri,
+  Position = Params.position,
+  ( hover_for_position(URI, Position, Hover)
+    -> Result = Hover
+    ; Result = null
+    ).
+
+pls_text_document_definition(_Server, Result, Params) :-
+  Document = Params.textDocument,
+  URI = Document.uri,
+  Position = Params.position,
+  info("Lookingfrom %w for definition at %q",[URI, Position]),
+  definition_for_position(URI, Position, References),
+  info("Found from %w definition %q",[URI, References]),
+  Result = References.
+
+% Find references for defined predicates
+pls_text_document_references(_Server, Result, Params) :-
+  Document = Params.textDocument,
+  URI = Document.uri,
+  Position = Params.position,
+  references_for_position(URI, Position, References),
+  info("Found in %w references %q",[URI, References]),
+  Result = References.
 
 % Shutdown
 

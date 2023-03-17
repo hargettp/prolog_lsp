@@ -13,15 +13,35 @@
 
   get_document_content/2,
   set_document_content/2,
-  clear_document_content/1
+  clear_document_content/1,
+  with_content/3,
+
+  add_document_item/3,
+  get_document_item/3,
+  clear_document_item/2,
+  clear_document_items/1,
+
+  add_document_line/3,
+  get_document_line_position/3,
+  clear_document_line/2,
+  clear_document_lines/1,
+  set_document_line_count/2,
+  get_document_line_count/2,
+  clear_document_line_count/1  
   ]).
 
-:- dynamic document_property/2.
 :- dynamic document_content/2.
+:- dynamic document_item/3.
+:- dynamic document_line_count/2.
+:- dynamic document_line_position/3.
+:- dynamic document_property/2.
 :- dynamic document_uri/1.
 
 store_document(URI, Language, Version, Content) :-
   clear_document_properties(URI),
+  clear_document_items(URI),
+  clear_document_lines(URI),
+  clear_document_line_count(URI),
   set_document_property(URI, language(Language)),
   set_document_property(URI, version(Version)),
   set_document_content(URI, Content).
@@ -58,17 +78,6 @@ clear_document_content(URI) :-
   retractall(document_content(URI, _)).
 
 % 
-% xref support for documents being edited
-% 
-prolog:xref_open_source(FileName, Stream) :-
-  uri_file_name(URI, FileName),
-  get_document_content(URI, Content),
-  open_string(Content, Stream).
-  
-prolog:xref_close_source(_FileName, Stream) :-
-  close(Stream).
-
-% 
 % document accessors
 % 
 
@@ -97,6 +106,112 @@ get_content(URI, Content) :-
 
 clear_content(URI) :-
   clear_document_content(URI).
+
+% --- items --
+add_document_item(URI, Range, Value) :-
+  assertz(document_item(URI, Range, Value)).
+
+% Get a document item based on its position
+get_document_item(URI, Position, Item) :-
+  nonvar(Position),
+  Line = Position.get(line),
+  Character = Position.get(character),
+  % Must have ground actual position
+  ground(Line),ground(Character),
+  get_document_item(
+    URI,
+    _{
+      start: _{line: Line, character: FromCharacter},
+      end:  _{line: _ToLine, character: ToCharacter}
+      },
+    Item
+    ),
+  Character >= FromCharacter,
+  Character =< ToCharacter.
+
+% Get a document item by unifying with URI, Range, and Value
+get_document_item(URI, Range, Value) :-
+  document_item(URI, Range, Value).
+
+clear_document_item(URI, Value) :-
+  retractall(document_item(URI, _Range, Value)).
+
+clear_document_items(URI) :-
+  clear_document_item(URI, _).
+
+:- meta_predicate with_content(?, ?, :).
+with_content(URI, In, Module:Goal) :-
+  get_document_content(URI, Content),
+  !,
+  setup_call_cleanup(
+    open_string(Content, In),
+    call(Module:Goal),
+    close(In)
+    ).
+
+with_content(URI, In, Module:Goal) :-
+  uri_file_name(URI, FileName),
+  setup_call_cleanup(
+    open(FileName, read, In),
+    call(Module:Goal),
+    close(In)
+    ).
+
+
+% --- lines --
+
+add_document_line(URI, Line, Position) :-
+  assertz(document_line_position(URI, Line, Position)).
+
+get_document_line_position(URI, Line, Position) :-
+  ground(Position),
+  get_document_line_count(URI, Max),
+  MidPoint is ceiling(Max / 2),
+  Range is ceiling(MidPoint / 2),
+  find_line_position(URI, Position, MidPoint, Range, Line),
+  !.
+
+get_document_line_position(URI, Line, Position) :-
+  document_line_position(URI, Line, Position).
+
+clear_document_line(URI, Line) :-
+  retractall(document_line_position(URI, Line, _)).
+
+clear_document_lines(URI) :-
+  clear_document_line(URI, _).
+
+set_document_line_count(URI, LineCount) :-
+  clear_document_line_count(URI),
+  assertz(document_line_count(URI, LineCount)).
+
+get_document_line_count(URI, LineCount) :-
+  document_line_count(URI, LineCount).
+
+clear_document_line_count(URI) :-
+  retractall(document_line_count(URI, _)).
+
+find_line_position(URI, Position, Start, _Range, Line) :-
+  position_falls_on_line(URI, Start, Position),
+  Line = Start.
+
+find_line_position(URI, Position, Start, Range, Line) :-
+  get_document_line_position(URI, Start, LinePosition),
+  NewRange is ceiling(Range / 2),
+  UpperStart is Start + NewRange,
+  LowerStart is Start - NewRange,
+  (Position < LinePosition
+    -> find_line_position(URI, Position, LowerStart, NewRange, Line)
+    ; find_line_position(URI, Position, UpperStart, NewRange, Line)
+    ).
+
+position_falls_on_line(URI, Line, Position) :-
+  get_document_line_position(URI, Line, LinePosition),
+  NextLine is Line + 1,
+  (get_document_line_position(URI, NextLine, NextPosition) 
+    -> true
+    ; NextPosition is inf 
+    ),
+  ( Position >= LinePosition , Position < NextPosition).
 
 % -- language --
 
