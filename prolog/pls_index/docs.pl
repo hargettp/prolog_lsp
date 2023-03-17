@@ -9,8 +9,6 @@
 
 :- use_module(documents).
 
-:- initialization( doc_load_library ).
-
 index_docs(URI, CommentPos, TermPos) :-
   uri_file_name(URI, FileName),
   process_comments(CommentPos, TermPos, FileName).
@@ -53,9 +51,9 @@ comment_markup(Comment, Markup) :-
   findall(
     String, 
     (
-      member(Indent-Line, Lines),
-      drop(Indent, Line, Indented),
-      string_codes(String, Indented)
+      member(_Indent-Indented, Lines),
+      string_codes(Line, Indented),
+      format_doc_line(Line,String)
       ),
     Strings
     ),
@@ -63,13 +61,15 @@ comment_markup(Comment, Markup) :-
     forall(member(String, Strings),writeln(String))
     ).
 
-drop(0, List, List) :- !.
-
-drop(N, _List, _ListAfterDrop) :-
-  N < 0 -> throw(domain_error(not_less_than_zero, N)),
+format_doc_line(Line, String) :-
+  % TODO: don't make assumptions about amount of whitespace
+  string_concat("! ", Core, Line),
+  swritef(String, "**%w**\n",[Core]),
   !.
 
-drop(N, [_ | Rest], ListAfterDrop) :-
-  NextN is N - 1,
-  drop(NextN, Rest, ListAfterDrop),
+format_doc_line(Line, String) :-
+  string_concat("% ", Core, Line),
+  swritef(String, "**%w**\n",[Core]),
   !.
+
+format_doc_line(Line, Line).
