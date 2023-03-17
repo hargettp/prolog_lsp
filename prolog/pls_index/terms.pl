@@ -4,8 +4,10 @@
 
 :- use_module(library(http/json)).
 :- use_module(library(log4p)).
+:- use_module(library(prolog_stack)).
 
 :- use_module(documents).
+:- use_module(docs).
 
 % Index the terms in a file, including subterms.
 % A file or document is a sequence of terms, and
@@ -17,11 +19,11 @@ index_terms(URI) :-
 index_term(URI) :-
   with_content(URI, In, (
     repeat,
-    read_term(In, Term, [subterm_positions(Pos)]),
+    read_term(In, Term, [subterm_positions(Pos), comments(CommentPos)]),
     ( Term \== end_of_file
       -> (
-          index_term(URI, Pos, Term)
-          % writef("--- %q\n",[Pos])
+          index_term(URI, Pos, Term),
+          index_comments(URI, Pos, Term, CommentPos)
           )
       ; (!, fail)
       )
@@ -65,6 +67,17 @@ index_term(URI, Pos, (Head :- Body)) :-
   add_document_item(URI, Range, defines(Caller)),
   index_goals(URI, Caller, BodyPos, Body),
   !.
+
+index_comments(URI, TermPos, (Head :- _Body), CommentPos) :-
+  functor_range(URI, TermPos, Range),
+  catch_with_backtrace(
+    index_docs(URI, Range, Head, CommentPos),
+    Error,
+    print_message(error, Error)
+    ),
+    !.
+
+index_comments(_URI, _TermPos, _Term, _CommentPos).
 
 index_goals(URI, Caller, GoalPos, Goal) :-
   forall(index_goal(URI, Caller, GoalPos, Goal), true).

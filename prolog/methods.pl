@@ -26,7 +26,7 @@
 
 % Language features
 :- server_method(prolog_language_server, 'textDocument/documentSymbol', pls_document_document_symbol).
-:- server_method(prolog_language_server, 'textDocument/hover', pls_hover).
+:- server_method(prolog_language_server, 'textDocument/hover', pls_text_document_hover).
 :- server_method(prolog_language_server, 'textDocument/references', pls_text_document_references).
 :- server_method(prolog_language_server, 'textDocument/definition', pls_text_document_definition).
 
@@ -146,8 +146,12 @@ pls_document_document_symbol(_Server, Result, Params) :-
   URI = Document.uri,
   document_symbols(URI, Result).
 
-pls_hover(_Server, Result, _Param) :-
-  Result = null.
+pls_text_document_hover(_Server, Result, _Param) :-
+  Document = Params.textDocument,
+  URI = Document.uri,
+  Position = Params.position,
+  hover_for_position(URI, Position, Hover),
+  Result = Hover.
 
 pls_text_document_definition(_Server, Result, Params) :-
   Document = Params.textDocument,
