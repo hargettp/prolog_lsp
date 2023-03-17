@@ -35,8 +35,20 @@ join_comments(CommentPos, Docs) :-
 %   re_replace("%*[[:blank:]]+","", Comment, String).
 
 hover_for_position(URI, Position, Hover) :-
-  get_document_item(URI, Position, references(Callable)),
-  get_document_item(URI, Range, references(Callable)),
+  get_document_item(URI, Position, references(Caller, Callable)),
+  get_document_item(URI, Range, references(Caller, Callable)),
+  get_document_item(_DocURI, _DocRange, docs(Callable, Docs)),
+  Hover = _{
+    range: Range,
+    contents: _{
+      kind: 'markdown',
+      value: Docs
+      }
+  }.
+
+hover_for_position(URI, Position, Hover) :-
+  get_document_item(URI, Position, defines(Callable)),
+  get_document_item(URI, Range, defines(Callable)),
   get_document_item(_DocURI, _DocRange, docs(Callable, Docs)),
   Hover = _{
     range: Range,

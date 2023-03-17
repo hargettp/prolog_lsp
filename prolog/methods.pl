@@ -146,12 +146,14 @@ pls_document_document_symbol(_Server, Result, Params) :-
   URI = Document.uri,
   document_symbols(URI, Result).
 
-pls_text_document_hover(_Server, Result, _Param) :-
+pls_text_document_hover(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
-  hover_for_position(URI, Position, Hover),
-  Result = Hover.
+  ( hover_for_position(URI, Position, Hover)
+    -> Result = Hover
+    ; Result = null
+    ).
 
 pls_text_document_definition(_Server, Result, Params) :-
   Document = Params.textDocument,
