@@ -70,12 +70,8 @@ index_term(URI, Pos, (Head :- Body)) :-
 
 index_comments(URI, TermPos, (Head :- _Body), CommentPos) :-
   functor_range(URI, TermPos, Range),
-  catch_with_backtrace(
-    index_docs(URI, Range, Head, CommentPos),
-    Error,
-    print_message(error, Error)
-    ),
-    !.
+  index_docs(URI, Range, Head, CommentPos),
+  !.
 
 index_comments(_URI, _TermPos, _Term, _CommentPos).
 
