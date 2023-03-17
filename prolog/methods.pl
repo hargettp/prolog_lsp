@@ -192,10 +192,13 @@ pls_workspace_symbols(_Server, Symbols, Params) :-
 % --- helpers ---
 
 set_trace_level("off") :-
-  log4p:set_global_log_level(info).
+  log4p:set_global_log_level(info),
+  jsonrpc_logging:disable_jsonrpc_tracing.
 
 set_trace_level("messages") :-
-  log4p:set_global_log_level(debug).
+  log4p:set_global_log_level(debug),
+  jsonrpc_logging:disable_jsonrpc_tracing.
 
 set_trace_level("verbose") :-
-  log4p:set_global_log_level(trace).
+  log4p:set_global_log_level(trace),
+  jsonrpc_logging:enable_jsonrpc_tracing.
