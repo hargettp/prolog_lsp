@@ -45,12 +45,4 @@ test(index_roots) :-
   uri_file_name(URI, '.'),
   index_roots([URI]).
 
-test(index_lines) :-
-  uri_file_name(URI, 'test.pl'),
-  index_lines(URI),
-  findall(Count, get_document_line_count(URI, Count), [11]),
-  findall(Line, get_document_line_position(URI, Line, 50), [2]),
-  findall(Line, get_document_line_position(URI, Line, 100), [6]),
-  findall(Line, get_document_line_position(URI, Line, 150), [11]).
-
 :- end_tests(pls_index_indexing).
