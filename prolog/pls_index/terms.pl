@@ -37,6 +37,11 @@ index_term(URI) :-
       )
     )).
 
+%! index_term(+URI, +Pos, +Term) is nondet.
+%
+% Indexing the term at the indicated Position in the
+% source with the indicated URI.
+%
 index_term(URI, Pos, (:- module(Module, Exports))) :-
   term_position_range(URI, Pos, Range),
   add_document_item(URI, Range, module(Module, Exports)),
@@ -81,12 +86,19 @@ index_term(URI, Pos, (Head :- Body)) :-
   index_goals(URI, Caller, BodyPos, Body),
   !.
 
+%! index_comments(+URI, +CommentPos, +TermPos) is nondet.
+%
+% Index the documentation for the term at the indicated TermPos,
+% using the CommentPos from an earlier `read_term/3` call.
+%
 index_comments(URI, CommentPos, TermPos) :-
   index_docs(URI, CommentPos, TermPos),
   !.
 
-index_comments(_URI, _TermPos, _Term, _CommentPos).
-
+%! index_exports(+URI, +Exports, +ExportPosList) is nondet.
+%
+% Index the exports in a module declaration.
+%
 index_exports(_URI, [], []).
 
 index_exports(URI, [Export | ExportRest], [ExportPos | ExportPosListRest]) :-
