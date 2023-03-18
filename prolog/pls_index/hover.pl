@@ -13,36 +13,34 @@ index_docs(URI, CommentPos, TermPos) :-
   uri_file_name(URI, FileName),
   process_comments(CommentPos, TermPos, FileName).
 
-join_comments(CommentPos, Docs) :-
-  with_output_to(string(Docs),
-    forall(
-      member(_Pos-Comment, CommentPos), 
-      ( writeln(Comment) )
-      )
-    ).
+hover_for_position(URI, Position, Hover) :-
+  get_document_item(URI, Position, exports(Callable)),
+  get_document_item(URI, Range, exports(Callable)),
+  get_hover(Callable, Range, Hover),
+  !.
 
 hover_for_position(URI, Position, Hover) :-
   get_document_item(URI, Position, references(Caller, Callable)),
   get_document_item(URI, Range, references(Caller, Callable)),
-  doc_comment(Callable, _FileName:_Line, _Summary, Comment),
-  comment_markup(Comment, Docs),
-  Hover = _{
-    range: Range,
-    contents: _{
-      kind: 'markdown',
-      value: Docs
-      }
-  },!.
+  get_hover(Callable, Range, Hover),
+  !.
 
 hover_for_position(URI, Position, Hover) :-
   get_document_item(URI, Position, defines(Callable)),
   get_document_item(URI, Range, defines(Callable)),
+  get_hover(Callable, Range, Hover),
+  !.
+
+get_hover(Callable, Range, Hover) :-
   doc_comment(Callable, _FileName:_Line, _Summary, Comment),
-  comment_markup(Comment, Docs),
-  Hover = _{
-    range: Range,
-    content: Docs
-  }.
+    comment_markup(Comment, Docs),
+    Hover = _{
+      range: Range,
+      contents: _{
+        kind: 'markdown',
+        value: Docs
+        }
+    }.
 
 comment_markup(Comment, Markup) :-
   is_structured_comment(Comment, Prefixes),

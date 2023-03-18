@@ -1,6 +1,7 @@
 :- module(pls_index_indexing, [
   index_text/1,
 
+  begin_indexing/1,
   start_index_roots/1,
 
   index_roots/1,
@@ -26,6 +27,27 @@ with_input_from(String, Goal) :-
       ),
     close(In)
     ).
+
+%! begin_indexing(+Params) is det.
+%
+%  Regardless of params, we always succeed
+%
+begin_indexing(Params) :-
+  RootURI = Params.get(rootUri),
+  (Folders = Params.get(workspaceFolders,[])
+    -> true
+    % if we are on the false path, we assume it was null instead
+    ; Folders = []
+    ),
+  findall(
+    URI,
+    ( member(Folder, Folders), URI = Folder.uri ),
+    FolderURIs
+    ),
+    list_to_set([RootURI | FolderURIs], RootURIs),
+    start_index_roots(RootURIs).
+
+begin_indexing(_).
 
 % asynchronously index all files under the specified roots,
 % which should be an array of URIs for each root

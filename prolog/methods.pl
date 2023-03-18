@@ -81,7 +81,8 @@ pls_initialize(Server, Result,Params) :-
     capabilities: Capabilities,
     serverInfo: _{name: "Prolog"}
     },
-  set_server_state(Server, initializing).
+  set_server_state(Server, initializing),
+  begin_indexing(Params).
 
 pls_initialized(Server, _Params) :-
   require_server_state(Server, initializing),
@@ -152,7 +153,7 @@ pls_text_document_hover(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
-  debug("Looking in %w for hover at %q",[URI, Position]),
+  info("Looking in %w for hover at %q",[URI, Position]),
   ( hover_for_position(URI, Position, Hover)
     -> Result = Hover
     ; Result = null
