@@ -6,6 +6,7 @@
 :- use_module(jsonrpc/server).
 :- use_module(capabilities).
 :- use_module(errors).
+:- use_module(hover).
 :- use_module(symbols).
 :- use_module(pls_index).
 

@@ -7,7 +7,7 @@
 :- use_module(library(prolog_stack)).
 
 :- use_module(documents).
-:- use_module(hover).
+:- use_module(docs).
 
 % Index the terms in a file, including subterms.
 % A file or document is a sequence of terms, and
