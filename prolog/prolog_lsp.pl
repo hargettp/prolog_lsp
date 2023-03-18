@@ -11,7 +11,6 @@
 :- reexport('./jsonrpc/server').
 :- reexport('./jsonrpc/client').
 :- reexport('./jsonrpc/hooks').
-:- use_module(files).
 :- use_module(symbols).
 :- use_module(errors).
 :- use_module(methods).

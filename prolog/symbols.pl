@@ -5,7 +5,6 @@
 
 :- use_module(library(uri)).
 
-:- use_module(files).
 :- use_module(pls_index).
 
 workspace_symbols(Query,Symbols) :-
