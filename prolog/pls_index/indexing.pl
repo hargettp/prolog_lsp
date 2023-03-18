@@ -11,6 +11,7 @@
 :- use_module(library(log4p)).
 :- use_module(library(option)).
 :- use_module(library(prolog_source)).
+:- use_module(library(prolog_stack)).
 :- use_module(library(uri)).
 
 :- use_module(documents).
@@ -44,7 +45,17 @@ begin_indexing(Params) :-
     ( member(Folder, Folders), URI = Folder.uri ),
     FolderURIs
     ),
-    list_to_set([RootURI | FolderURIs], RootURIs),
+    swi_root(SwiRootURI),
+    pack_roots(PackRoots),
+    append([
+      [RootURI],
+      [SwiRootURI],
+      PackRoots,
+      FolderURIs
+      ],
+      AllRoots),
+    % list_to_set([RootURI | [SwiRootURI |FolderURIs]], RootURIs),
+    list_to_set(AllRoots, RootURIs),
     start_index_roots(RootURIs).
 
 begin_indexing(_).
@@ -71,7 +82,11 @@ index_file(Source) :-
   file_name_extension(_Base, Extension, Source),
   prolog_extension(Extension),
   uri_file_name(URI, Source),
-  index_text(URI),
+  catch_with_backtrace(
+    index_text(URI),
+    Error,
+    error(Error)
+    ),
   debug("Finished index of file %w", [Source]).
 
 index_text(URI) :-
@@ -81,6 +96,21 @@ index_text(URI) :-
   index_lines(URI),
   index_terms(URI),
   !.
+
+swi_root(SwiRootURI) :-
+  absolute_file_name(swi(library),SwiRoot, [file_type(directory)]),
+  uri_file_name(SwiRootURI, SwiRoot).
+
+pack_roots(PackRoots) :-
+  findall(
+    PackRoot,
+    (
+      pack_property(_Pack, directory(PackDirectory)),
+      directory_file_path(PackDirectory,'prolog',PackPrologDirectory),
+      uri_file_name(PackRoot, PackPrologDirectory)
+      ),
+    PackRoots
+    ).
   
 prolog_extension(Extension) :-
   member(Extension, [
