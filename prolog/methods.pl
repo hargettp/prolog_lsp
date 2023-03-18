@@ -129,9 +129,11 @@ pls_text_document_did_change(_Server, Params) :-
   Document = Params.textDocument,
   Changes = Params.contentChanges,
   URI = Document.uri,
-  Content = Changes.text,
   get_document_property(URI, language(Language)),
-  store_document(URI, Language, Document.version, Content),
+  forall(
+    member(Change, Changes),
+    store_document(URI, Language, Document.version, Change.text)  
+    ),
   index_text(URI).
 
 pls_text_document_did_close(_Server, Params) :-
