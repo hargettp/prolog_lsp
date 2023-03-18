@@ -153,7 +153,7 @@ pls_text_document_hover(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
-  info("Looking in %w for hover at %q",[URI, Position]),
+  debug("Looking in %w for hover at %q",[URI, Position]),
   ( hover_for_position(URI, Position, Hover)
     -> Result = Hover
     ; Result = null

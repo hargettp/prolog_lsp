@@ -12,12 +12,6 @@ workspace_symbols(Query,Symbols) :-
   findall(Symbol,workspace_symbol(Query,Symbol),Symbols).
 
 workspace_symbol(Query,Symbol) :-
-  % get_document_uri(URI),
-  % uri_file_name(URI,FileName),
-  % symbol_range(FileName, Callable, Range),
-  % functor(Callable, Name, _Arity),
-  % atom_concat(Query,_,Name),
-  % EndLine is StartLine + 1,
   get_document_item(URI, Range, defines(Callable)),
   Callable = Name/_Arity,
   atom_concat(Query,_,Name),
@@ -30,10 +24,6 @@ workspace_symbol(Query,Symbol) :-
       range: Range
       }
     }.
-
-module_file(Module,File) :-
-  file_base_name(File,Name),
-  file_name_extension(Module,pl,Name).
 
 document_symbols(URI, SymbolInfos) :-
   findall(SymbolInfo, document_symbol(URI, SymbolInfo), SymbolInfos).

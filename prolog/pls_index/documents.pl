@@ -121,7 +121,7 @@ add_document_item(URI, Range, Value) :-
 %! get_document_item(?URI, ?Range, ?Item) is nondet.
 %
 % When called in its first form, get a document item based on its position,
-% otherwise a return document item by unifying with URI, Range, and Item .
+% otherwise return a document item by unifying with URI, Range, and Item .
 %
 get_document_item(URI, Position, Item) :-
   nonvar(Position),
