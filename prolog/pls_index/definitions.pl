@@ -5,14 +5,20 @@
 :- use_module(library(log4p)).
 :- use_module(documents).
 
-definition_for_position(URI, Position, References) :-
+definition_for_position(URI, Position, Definitions) :-
+  get_document_item(URI, Position, exports(Callable)),
+  get_definitions(Callable, Definitions).
+
+definition_for_position(URI, Position, Definitions) :-
   get_document_item(URI, Position, references(_Caller, Callable)),
-  info("Found %w for callable %w",[Position, Callable]),
+  get_definitions(Callable, Definitions).
+
+get_definitions(Callable, Definitions) :-
   findall(
     _{
       uri: DefURI,
       range: DefRange
       }, 
     get_document_item(DefURI, DefRange, defines(Callable)), 
-    References
+    Definitions
     ).

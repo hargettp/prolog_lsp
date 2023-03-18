@@ -152,6 +152,7 @@ pls_text_document_hover(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
+  debug("Looking in %w for hover at %q",[URI, Position]),
   ( hover_for_position(URI, Position, Hover)
     -> Result = Hover
     ; Result = null
@@ -161,19 +162,22 @@ pls_text_document_definition(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
-  info("Lookingfrom %w for definition at %q",[URI, Position]),
-  definition_for_position(URI, Position, References),
-  info("Found from %w definition %q",[URI, References]),
-  Result = References.
+  debug("Looking in %w for definition at %q",[URI, Position]),
+  ( definition_for_position(URI, Position, Definitions)
+    -> Result = Definitions
+    ; Result = null
+    ).
 
 % Find references for defined predicates
 pls_text_document_references(_Server, Result, Params) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
-  references_for_position(URI, Position, References),
-  info("Found in %w references %q",[URI, References]),
-  Result = References.
+  debug("Looking in %w for references at %q",[URI, Position]),
+  ( references_for_position(URI, Position, References)
+    -> Result = References
+    ; Result = null
+    ).
 
 % Shutdown
 

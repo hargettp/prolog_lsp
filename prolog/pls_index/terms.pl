@@ -7,7 +7,7 @@
 :- use_module(library(prolog_stack)).
 
 :- use_module(documents).
-:- use_module(docs).
+:- use_module(hover).
 
 % Index the terms in a file, including subterms.
 % A file or document is a sequence of terms, and
@@ -16,6 +16,10 @@ index_terms(URI) :-
   clear_document_items(URI),
   forall(index_term(URI), true).
 
+%! index_term(+URI) is nondet.
+%
+% On succesive calls, read and index every time in the source at URI.
+%
 index_term(URI) :-
   with_content(URI, In, (
     repeat,
@@ -32,10 +36,15 @@ index_term(URI) :-
       ; (!, fail)
       )
     )).
-    
+
 index_term(URI, Pos, (:- module(Module, Exports))) :-
   term_position_range(URI, Pos, Range),
   add_document_item(URI, Range, module(Module, Exports)),
+  % Arg of :-, which is the term position for module
+  term_position_subpos(Pos, [DirectiveArgPos]),
+  % Args of module: first is the name, second is export list
+  term_position_subpos(DirectiveArgPos, [_,list_position(_,_,ExportPosList, _)]),
+  index_exports(URI, Exports, ExportPosList),
   !.
 
 index_term(URI, Pos, (:- use_module(Module))) :-
@@ -78,6 +87,13 @@ index_comments(URI, CommentPos, TermPos) :-
 
 index_comments(_URI, _TermPos, _Term, _CommentPos).
 
+index_exports(_URI, [], []).
+
+index_exports(URI, [Export | ExportRest], [ExportPos | ExportPosListRest]) :-
+  term_position_range(URI, ExportPos, Range),
+  add_document_item(URI, Range, exports(Export)),
+  index_exports(URI, ExportRest, ExportPosListRest).
+
 index_goals(URI, Caller, GoalPos, Goal) :-
   forall(index_goal(URI, Caller, GoalPos, Goal), true).
 
@@ -90,7 +106,7 @@ index_goal(URI, Caller, term_position(_From, _To, FFrom, FTo, _Subpos), Goal) :-
   Callable = Name/Arity,
   Item = references(Caller, Callable),
   debug("Adding item %w",[Item]),
-  add_document_item(URI, Range, Item).
+  add_document_item(URI, Range, Item) .
 
 index_goal(URI, Caller, term_position(_From, _To, _FFrom, _FTo, Subpos), Goal) :-
   functor(Goal, _Name, Arity),

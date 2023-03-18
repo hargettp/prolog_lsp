@@ -1,4 +1,4 @@
-:- module(pls_index_docs, [
+:- module(pls_index_hover, [
   index_docs/3,
   hover_for_position/3
 ]).

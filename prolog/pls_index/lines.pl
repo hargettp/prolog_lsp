@@ -20,7 +20,7 @@ document_line_position(URI, Line, Position) :-
     stream_line_position(In, Line, Position)
     ).
 
-stream_line_position(_In, 1, 0).
+stream_line_position(_In, 0, 0).
 stream_line_position(In, Line, Position) :-
   repeat,
   read_line_to_string(In, Text),

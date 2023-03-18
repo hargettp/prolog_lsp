@@ -1,5 +1,6 @@
 :- begin_tests(pls_index_indexing).
 
+:- use_module(library(log4p)).
 :- use_module(library(prolog_stack)).
 :- use_module(library(uri)).
 
@@ -36,9 +37,9 @@ test(reading) :-
   list_to_set(Definitions, Actual),
   Expected = [
     references_for_position/3, 
-    definition_reference/3, 
-    call_reference/3
+    get_references/2
     ],
+  warn("Actual: %w",[Actual]),
   once(expected_vs_actual(Expected, Actual)).
 
 test(index_roots) :-
