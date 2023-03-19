@@ -5,21 +5,21 @@
 :- use_module(pls_index).
 
 hover_for_position(URI, Position, Hover) :-
-  get_document_item(URI, Position, exports(Callable)),
-  get_document_item(URI, Range, exports(Callable)),
-  get_hover(Callable, Range, Hover),
+  get_document_item(URI, Position, exports(Predicate)),
+  get_document_item(URI, Range, exports(Predicate)),
+  get_hover(Predicate, Range, Hover),
   !.
 
 hover_for_position(URI, Position, Hover) :-
-  get_document_item(URI, Position, references(Caller, Callable)),
-  get_document_item(URI, Range, references(Caller, Callable)),
-  get_hover(Callable, Range, Hover),
+  get_document_item(URI, Position, references(Caller, Predicate)),
+  get_document_item(URI, Range, references(Caller, Predicate)),
+  get_hover(Predicate, Range, Hover),
   !.
 
 hover_for_position(URI, Position, Hover) :-
-  get_document_item(URI, Position, defines(Callable)),
-  get_document_item(URI, Range, defines(Callable)),
-  get_hover(Callable, Range, Hover),
+  get_document_item(URI, Position, defines(Predicate)),
+  get_document_item(URI, Range, defines(Predicate)),
+  get_hover(Predicate, Range, Hover),
   !.
 
 %! get_hover(+Callablle, +Range, -Hover) is nondet.
@@ -27,8 +27,8 @@ hover_for_position(URI, Position, Hover) :-
 % Return a hover for the indicated range; will always
 % return minimal markup, even if no documentation available.
 %
-get_hover(Callable, Range, Hover) :-
-  get_docs(Callable, Docs),
+get_hover(Predicate, Range, Hover) :-
+  get_docs(Predicate, Docs),
   Hover = _{
     range: Range,
     contents: _{
@@ -37,8 +37,8 @@ get_hover(Callable, Range, Hover) :-
       }
   }.
 
-get_hover(Callable, Range, Hover) :-
-  swritef(Docs, "## %w\n*No documentation available.*",[Callable]),
+get_hover(Predicate, Range, Hover) :-
+  swritef(Docs, "## %w\n*No documentation available.*",[Predicate]),
   Hover = _{
     range: Range,
     contents: _{

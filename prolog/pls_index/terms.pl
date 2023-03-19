@@ -115,8 +115,8 @@ index_goal(URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal)
 index_goal(URI, Caller, term_position(_From, _To, FFrom, FTo, _Subpos), Goal) :-
   functor_range(URI, FFrom, FTo, Range),
   functor(Goal, Name, Arity),
-  Callable = Name/Arity,
-  Item = references(Caller, Callable),
+  Predicate = Name/Arity,
+  Item = references(Caller, Predicate),
   debug("Adding item %w",[Item]),
   add_document_item(URI, Range, Item) .
 

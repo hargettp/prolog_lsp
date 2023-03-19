@@ -12,11 +12,11 @@ index_docs(URI, CommentPos, TermPos) :-
   uri_file_name(URI, FileName),
   process_comments(CommentPos, TermPos, FileName).
 
-get_docs(Callable, Docs) :-
-  doc_comment(Callable, _FileName:_Line, _Summary, Comment),
-  comment_markup(Callable, Comment, Docs).
+get_docs(Predicate, Docs) :-
+  doc_comment(Predicate, _FileName:_Line, _Summary, Comment),
+  comment_markup(Predicate, Comment, Docs).
 
-comment_markup(Callable, Comment, Markup) :-
+comment_markup(Predicate, Comment, Markup) :-
   is_structured_comment(Comment, Prefixes),
   string_codes(Comment, Codes),
   indented_lines(Codes, Prefixes, Lines),
@@ -31,7 +31,7 @@ comment_markup(Callable, Comment, Markup) :-
     ),
   with_output_to(string(Markup),
     (
-      writef("## %w\n",[Callable]),
+      writef("## %w\n",[Predicate]),
       forall(member(String, Strings),writeln(String))
       )
     ).

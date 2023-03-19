@@ -6,19 +6,19 @@
 :- use_module(documents).
 
 definition_for_position(URI, Position, Definitions) :-
-  get_document_item(URI, Position, exports(Callable)),
-  get_definitions(Callable, Definitions).
+  get_document_item(URI, Position, exports(Predicate)),
+  get_definitions(Predicate, Definitions).
 
 definition_for_position(URI, Position, Definitions) :-
-  get_document_item(URI, Position, references(_Caller, Callable)),
-  get_definitions(Callable, Definitions).
+  get_document_item(URI, Position, references(_Caller, Predicate)),
+  get_definitions(Predicate, Definitions).
 
-get_definitions(Callable, Definitions) :-
+get_definitions(Predicate, Definitions) :-
   findall(
     _{
       uri: DefURI,
       range: DefRange
       }, 
-    get_document_item(DefURI, DefRange, defines(Callable)), 
+    get_document_item(DefURI, DefRange, defines(Predicate)), 
     Definitions
     ).

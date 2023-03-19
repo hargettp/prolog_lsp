@@ -30,8 +30,8 @@ test(reading) :-
   set_document_content(URI, Content),
   index_text(URI),
   findall(
-    Callable,
-    get_document_item(URI, _Ref, defines(Callable)),
+    Predicate,
+    get_document_item(URI, _Ref, defines(Predicate)),
     Definitions
     ),
   list_to_set(Definitions, Actual),

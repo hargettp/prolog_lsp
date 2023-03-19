@@ -60,16 +60,28 @@ begin_indexing(Params) :-
 
 begin_indexing(_).
 
-% asynchronously index all files under the specified roots,
+%! start_index_roots(+Roots) is det.
+%
+% Asynchronously index all files under the specified roots,
 % which should be an array of URIs for each root
+%
 start_index_roots(Roots) :-
   thread_create(index_roots(Roots), _Id, [detached(true)]).
 
+%! index_roots(+Roots) is det.
+%
+% Given a list of root URIs, index all of the prolog source underneath
+% each root.
+% 
 index_roots(Roots) :-
   debug("Starting indexing of files in all roots: %w", [Roots]),
   forall(member(Root, Roots), index_root(Root)),
   debug("Finished indexing of files in all roots: %w", [Roots]).
 
+%! index_root(+URI) is det.
+%
+% Index all of the source files under the indicated root.
+%
 index_root(URI) :-
   debug("Starting index of files in root %w", [URI]),
   uri_file_name(URI, Directory),
@@ -77,6 +89,10 @@ index_root(URI) :-
   forall(member(File, Files), index_file(File)),
   debug("Finished index of files in root %w", [URI]).
 
+%! index_file(+Source) is det.
+%
+% Index the specified source file.
+%
 index_file(Source) :-
   debug("Starting index of file %w", [Source]),
   file_name_extension(_Base, Extension, Source),
@@ -89,6 +105,12 @@ index_file(Source) :-
     ),
   debug("Finished index of file %w", [Source]).
 
+%! index_text(+URI) is det.
+%
+% Given a URI for a source file, index its text, taking into account
+% whether there is in-memory data for an open file or the current content
+% on the filesystem.
+%
 index_text(URI) :-
   uri_file_name(URI,FileName),
   set_document_uri(URI), 
@@ -97,10 +119,18 @@ index_text(URI) :-
   index_terms(URI),
   !.
 
+%! swi_root(-SwiRootURI) is nondet.
+%
+% Return the root for the SWI-Prolog library.
+%
 swi_root(SwiRootURI) :-
   absolute_file_name(swi(library),SwiRoot, [file_type(directory)]),
   uri_file_name(SwiRootURI, SwiRoot).
 
+%! pack_roots(-PackRoots) is det.
+%
+% Return the roots for each installed package.
+%
 pack_roots(PackRoots) :-
   findall(
     PackRoot,

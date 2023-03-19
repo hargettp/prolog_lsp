@@ -11,8 +11,8 @@ workspace_symbols(Query,Symbols) :-
   findall(Symbol,workspace_symbol(Query,Symbol),Symbols).
 
 workspace_symbol(Query,Symbol) :-
-  get_document_item(URI, Range, defines(Callable)),
-  Callable = Name/_Arity,
+  get_document_item(URI, Range, defines(Predicate)),
+  Predicate = Name/_Arity,
   atom_concat(Query,_,Name),
   symbol_kind(function,Kind),
   Symbol = symbol{
@@ -28,10 +28,10 @@ document_symbols(URI, SymbolInfos) :-
   findall(SymbolInfo, document_symbol(URI, SymbolInfo), SymbolInfos).
 
 document_symbol(URI, Symbol) :-
-  get_document_item(URI, Range, defines(Callable)),
-  Callable = Name/_Arity,
+  get_document_item(URI, Range, defines(Predicate)),
+  Predicate = Name/_Arity,
   symbol_kind(function,Kind),
-  term_string(Callable, Detail),
+  term_string(Predicate, Detail),
   Symbol = symbol{
     name: Name,
     detail: Detail,
