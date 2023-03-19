@@ -1,6 +1,7 @@
 :- module(pls_index, [
   ]).
 
+:- reexport(pls_index/completions).
 :- reexport(pls_index/definitions).
 :- reexport(pls_index/docs).
 :- reexport(pls_index/documents).
