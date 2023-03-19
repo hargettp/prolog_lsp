@@ -4,6 +4,8 @@
 
 ]).
 
+:- use_module(library(dcg/basics)).
+
 :- use_module(library(pldoc)).
 :- use_module(library(pldoc/doc_process)).
 :- use_module(library(pldoc/doc_wiki)).
@@ -31,20 +33,46 @@ comment_markup(Predicate, Comment, Markup) :-
     ),
   with_output_to(string(Markup),
     (
-      writef("## %w\n",[Predicate]),
+      writef("**%w**\n\n",[Predicate]),
       forall(member(String, Strings),writeln(String))
       )
     ).
 
 format_doc_line(Line, String) :-
   % TODO: don't make assumptions about amount of whitespace
-  string_concat("! ", Core, Line),
-  swritef(String, "**%w**\n",[Core]),
+  mode(Line, Mode),
+  swritef(String, "*%w*\n",[Mode]),
   !.
 
 format_doc_line(Line, String) :-
-  string_concat("% ", Core, Line),
-  swritef(String, "**%w**\n",[Core]),
+  comment(Line, Comment),
+  swritef(String, "%w\n",[Comment]),
   !.
 
 format_doc_line(Line, Line).
+
+mode(Line, Mode) :-
+  string_codes(Line, Codes),
+  phrase(mode(Mode),Codes).
+
+mode(Mode) -->
+  "!",
+  whites,
+  string(Codes),
+  {string_codes(Mode, Codes)}.
+
+mode(Mode) -->
+  "%%",
+  whites,
+  string(Codes),
+  {string_codes(Mode, Codes)}.
+
+comment(Line, Comment) :-
+  string_codes(Line, Codes),
+  phrase(comment(Comment), Codes).
+
+comment(Comment) -->
+  "%",
+  whites,
+  string(Codes),
+  {string_codes(Comment, Codes)}.
