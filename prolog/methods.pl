@@ -30,6 +30,8 @@
 :- server_method(prolog_language_server, 'textDocument/hover', pls_text_document_hover).
 :- server_method(prolog_language_server, 'textDocument/references', pls_text_document_references).
 :- server_method(prolog_language_server, 'textDocument/definition', pls_text_document_definition).
+:- server_method(prolog_language_server, 'textDocument/completion', pls_text_document_completion).
+:- server_method(prolog_language_server, 'textDocument/resolve', pls_text_document_resolve).
 
 % Shutdown
 :- server_method(prolog_language_server, shutdown, pls_shutdown).
@@ -180,6 +182,16 @@ pls_text_document_references(_Server, Result, Params) :-
     -> Result = References
     ; Result = null
     ).
+
+pls_text_document_completion(_Server, Result, Params) :-
+  Document = Params.textDocument,
+  URI = Document.uri,
+  Position = Params.position,
+  completions_for_position(URI, Position, Completions),
+  Result = Completions.
+
+pls_text_document_resolve(_Server, Result, Params) :-
+  Result = Params.
 
 % Shutdown
 

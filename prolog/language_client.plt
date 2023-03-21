@@ -80,6 +80,8 @@ test(methods,[
     "textDocument/hover",
     "textDocument/references",
     "textDocument/definition",
+    "textDocument/completion",
+    "textDocument/resolve",
     "shutdown",
     "exit",
     "workspace/symbol"

@@ -24,14 +24,17 @@ index_term(URI) :-
   with_content(URI, In, (
     repeat,
     read_term(In, Term, [
+      syntax_errors(dec10),
       term_position(TermPos),
       subterm_positions(SubPos), 
-      comments(CommentPos)
+      comments(CommentPos),
+      variable_names(Vars)
       ]),
     ( Term \== end_of_file
       -> (
           index_term(URI, SubPos, Term),
-          index_comments(URI, CommentPos, TermPos)
+          index_comments(URI, CommentPos, TermPos),
+          index_signature(URI, SubPos, Term, Vars)
           )
       ; (!, fail)
       )
@@ -94,6 +97,16 @@ index_term(URI, Pos, (Head :- Body)) :-
 index_comments(URI, CommentPos, TermPos) :-
   index_docs(URI, CommentPos, TermPos),
   !.
+
+index_signature(URI, Pos, Head :- _Body, Vars) :-
+  with_output_to(string(Signature),
+    write_term(Head,[variable_names(Vars)])
+    ),
+  term_position_range(URI, Pos, Range),
+  functor(Head, Name, Arity),
+  add_document_item(URI, Range, signature(Name/Arity, Signature)).
+
+index_signature(_, _, _, _).
 
 %! index_exports(+URI, +Exports, +ExportPosList) is nondet.
 %

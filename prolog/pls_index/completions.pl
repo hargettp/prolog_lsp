@@ -1,8 +1,55 @@
 :- module(pls_index_completions, [
+  completions_for_position/3,
+  suggestions_for_position/3,
   identifier_for_position/3
 ]).
 
+:- use_module(docs).
 :- use_module(documents).
+
+:- use_module(library(log4p)).
+
+completions_for_position(URI, Position, Completions) :-
+  % we usually are at the end, so not pointing at a character
+  % so go back 1
+  prev_position(Position, Previous),
+  ( suggestions_for_position(URI, Previous, Suggestions)
+    -> (
+        findall(
+          _{
+            label: Label,
+            kind: 3,
+            documentation: Docs,
+            insertText: Signature,
+            insertMode: 2
+          },
+          (
+            member(Suggestion, Suggestions),
+            Suggestion = Name/Arity,
+            term_string(Suggestion, Label),
+            get_document_item(_DefURI, _DefRange, signature(Name/Arity, Signature)),
+            get_docs(Suggestion, Docs)
+            ),
+          Completions
+        )
+      )
+    ; Completions = []
+    ).
+
+suggestions_for_position(URI, Position, Suggestions) :-
+  identifier_for_position(URI, Position, Identifier),
+  atom_length(Identifier, Length),
+  (Length >= 3
+    -> findall(
+        Name/Arity,
+        (
+          get_document_item(_DefURI, _DefRange, defines(Name/Arity)),
+          sub_atom(Name, _Before, Length, _After, Identifier)
+          ),
+        Suggestions
+      )
+    ; fail
+    ).
 
 identifier_for_position(URI, Position, Identifier) :-
   find_identifier_start(URI, Position, Start),
@@ -78,7 +125,8 @@ content_at_position(URI, Position, Length, Text) :-
   with_content(URI, In,
     (
       seek(In, Offset, bof, _),
-      read_string(In, Length, Text)
+      read_string(In, Length, Text),
+      (Text \= [])
       )
     ).
 

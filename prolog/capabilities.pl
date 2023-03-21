@@ -13,6 +13,9 @@ server_capabilities(Capabilities) :-
     documentSymbolProvider: true,
     hoverProvider: true,
     referencesProvider: true,
-    definitionProvider: true
+    definitionProvider: true,
+    completionProvider: _{
+      
+    }
   }.
 
