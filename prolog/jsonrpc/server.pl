@@ -89,7 +89,7 @@ handle_notification(Server, _Peer, Notification) :-
 dispatch_method(Server, Id, MethodName, Params, Response) :-
   find_handler(Server, MethodName, Module:Handler),
   debug('found handler %w:%w for %w',[Module, Handler, Server]),
-  apply(Module:Handler,[Server, Result, Params]),
+  apply(Module:Handler,[Server, Params, Result]),
   Response = _{id: Id, result: Result },
   info("Method %w called", [MethodName]).
 
@@ -108,7 +108,7 @@ dispatch_notification(Server, MethodName, _Params) :-
 echo(_Server, Params, Params) :-
   info('Echoing %w', [Params]).
 
-crash(_Server, Params,Params) :-
+crash(_Server, Params, Params) :-
   warn("Intentionally crashing"),
   throw(crash).
 

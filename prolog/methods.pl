@@ -75,7 +75,7 @@ require_server_state(Server, Required) :-
 % Initialization
 % 
 
-pls_initialize(Server, Result,Params) :-
+pls_initialize(Server, Params, Result) :-
   TraceLevel = Params.get(trace, "off"),
   set_trace_level(TraceLevel),
   \+ get_server_state(Server, _),
@@ -95,15 +95,15 @@ pls_initialized(Server, _Params) :-
 % Utility
 % 
 
-pls_echo(Server, Result, Params) :-
+pls_echo(Server, Params, Result) :-
   require_server_state(Server, initialized),
-  jsonrpc_server:echo(Server, Result, Params).
+  jsonrpc_server:echo(Server, Params, Result).
 
 pls_crash(Server, Result, Params) :-
   require_server_state(Server, initialized),
   jsonrpc_server:crash(Server, Result, Params).
 
-pls_methods(Server, Result, _Params) :-
+pls_methods(Server, _Params, Result) :-
   % require_server_state(Server, initialized),
   findall(
     Method, 
@@ -147,12 +147,12 @@ pls_text_document_did_close(_Server, Params) :-
 
 % Other text document
 
-pls_document_document_symbol(_Server, Result, Params) :-
+pls_document_document_symbol(_Server, Params, Result) :-
   Document = Params.textDocument,
   URI = Document.uri,
   document_symbols(URI, Result).
 
-pls_text_document_hover(_Server, Result, Params) :-
+pls_text_document_hover(_Server, Params, Result) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
@@ -162,7 +162,7 @@ pls_text_document_hover(_Server, Result, Params) :-
     ; Result = null
     ).
 
-pls_text_document_definition(_Server, Result, Params) :-
+pls_text_document_definition(_Server, Params, Result) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
@@ -173,7 +173,7 @@ pls_text_document_definition(_Server, Result, Params) :-
     ).
 
 % Find references for defined predicates
-pls_text_document_references(_Server, Result, Params) :-
+pls_text_document_references(_Server, Params, Result) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
@@ -183,19 +183,19 @@ pls_text_document_references(_Server, Result, Params) :-
     ; Result = null
     ).
 
-pls_text_document_completion(_Server, Result, Params) :-
+pls_text_document_completion(_Server, Params, Result) :-
   Document = Params.textDocument,
   URI = Document.uri,
   Position = Params.position,
   completions_for_position(URI, Position, Completions),
   Result = Completions.
 
-pls_text_document_resolve(_Server, Result, Params) :-
+pls_text_document_resolve(_Server, Params, Result) :-
   Result = Params.
 
 % Shutdown
 
-pls_shutdown(Server, Result, _Params) :-  
+pls_shutdown(Server, _Params, Result) :-  
   require_server_state(Server, initialized),
   % we don't actually shut anything down right now
   Result = _{},
@@ -206,8 +206,9 @@ pls_exit(Server, _Params) :-
   % we don't actually exit anything down right now
   request_exit_server(Server).
 
-pls_workspace_symbols(_Server, Symbols, Params) :-
-  workspace_symbols(Params.query, Symbols).
+pls_workspace_symbols(_Server, Params, Result) :-
+  workspace_symbols(Params.query, Symbols),
+  Result = Symbols.
 
 % --- helpers ---
 
