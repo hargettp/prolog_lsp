@@ -107,13 +107,29 @@ set_content(URI, Content) :-
   clear_language(URI),
   assertz(document_content(URI, Content)).
 
+%! get_content(?URI, ?Content) is det.
+% 
+% Retrieve the content of the document associated with the URI
+% as a string.
+% 
 get_content(URI, Content) :-
   once(document_content(URI, Content)).
 
+%! clear_content(+URI) is det.
+% 
+% Flush the content associated with the URI.
+% 
 clear_content(URI) :-
   clear_document_content(URI).
 
 % --- items --
+
+%! add_document_item(?URI, ?Range, ?Value) is nondet.
+%
+% Add a piece of information about a specific range in a specific
+% document. Items are the basis of all cross-referencing, hover info,
+% etc.
+%
 add_document_item(URI, Range, Value) :-
   assertz(document_item(URI, Range, Value)).
 
