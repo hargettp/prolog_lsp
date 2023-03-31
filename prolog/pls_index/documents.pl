@@ -167,7 +167,6 @@ with_content(URI, In, Module:Goal) :-
     close(In)
     ).
 
-
 % --- lines --
 
 add_document_line(URI, Line, Position) :-

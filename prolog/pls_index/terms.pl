@@ -25,7 +25,6 @@ index_term(URI) :-
     repeat,
     read_term(In, Term, [
       syntax_errors(dec10),
-      term_position(TermPos),
       subterm_positions(SubPos), 
       comments(CommentPos),
       variable_names(Vars)
@@ -33,7 +32,8 @@ index_term(URI) :-
     ( Term \== end_of_file
       -> (
           index_term(URI, SubPos, Term),
-          index_comments(URI, CommentPos, TermPos),
+          term_position_range(URI, SubPos, Range),
+          index_comments(URI, Term, Range, CommentPos),
           index_signature(URI, SubPos, Term, Vars)
           )
       ; (!, fail)
@@ -80,6 +80,9 @@ index_term(URI, Pos, (:- include(FileSpec) )) :-
   add_document_item(URI, Range, includes(FileSpec)),
   !.
 
+index_term(URI, Pos, (_Module:Head :- Body)) :-
+  index_term(URI, Pos, (Head :- Body)).
+
 index_term(URI, Pos, (Head :- Body)) :-
   functor(Head, Name, Arity),
   Caller = Name/Arity,
@@ -94,8 +97,8 @@ index_term(URI, Pos, (Head :- Body)) :-
 % Index the documentation for the term at the indicated TermPos,
 % using the CommentPos from an earlier `read_term/3` call.
 %
-index_comments(URI, CommentPos, TermPos) :-
-  index_docs(URI, CommentPos, TermPos),
+index_comments(URI, Term, Range, CommentPos) :-
+  index_docs(URI, Term, Range, CommentPos),
   !.
 
 index_signature(URI, Pos, Head :- _Body, Vars) :-

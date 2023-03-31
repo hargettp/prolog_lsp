@@ -1,5 +1,5 @@
 :- module(pls_index_docs, [
-  index_docs/3,
+  index_docs/4,
   get_docs/2
 
 ]).
@@ -10,12 +10,40 @@
 :- use_module(library(pldoc/doc_process)).
 :- use_module(library(pldoc/doc_wiki)).
 
-index_docs(URI, CommentPos, TermPos) :-
-  uri_file_name(URI, FileName),
-  process_comments(CommentPos, TermPos, FileName).
+:- use_module(documents).
+
+index_docs(URI, _Module:Head :- Body, Range, CommentPos) :-
+  index_docs(URI, Head :- Body, Range, CommentPos).
+
+index_docs(URI, Head :- _Body, Range, CommentPos) :-
+  functor(Head, Name, Arity),
+  Predicate = Name/Arity,
+  ( filter_for_docs(Range, CommentPos, DocLine, Docs)
+    -> add_document_item(URI, Range, docs(Predicate, DocLine, Docs))
+    ; true
+    ),
+  !.
+
+index_docs(_URI, _Term, _Range, _CommentPos, _TermPos).
+
+filter_for_docs(Range, CommentPos, DocLine, Docs) :-
+  findall(
+    Line-Comment,
+    (
+      member(Pos-Comment, CommentPos),
+      stream_position_data(line_count, Pos, LineNo),
+      Line is LineNo - 1,
+      string_lines(Comment, Lines),
+      length(Lines, LineCount),
+      Start = Range.start.line,
+      Start is Line + LineCount
+    ),
+    Comments
+    ),
+  Comments = [DocLine-Docs].
 
 get_docs(Predicate, Docs) :-
-  doc_comment(Predicate, _FileName:_Line, _Summary, Comment),
+  get_document_item(_URI, _Range, docs(Predicate, _DocLine, Comment)),
   comment_markup(Predicate, Comment, Docs).
 
 comment_markup(Predicate, Comment, Markup) :-
