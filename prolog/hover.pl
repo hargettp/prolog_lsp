@@ -36,14 +36,3 @@ get_hover(Predicate, Range, Hover) :-
       value: Docs
       }
   }.
-
-get_hover(Predicate, Range, Hover) :-
-  swritef(Docs, "## %w\n*No documentation available.*",[Predicate]),
-  Hover = _{
-    range: Range,
-    contents: _{
-      kind: 'markdown',
-      value: Docs
-      }
-  }.
-

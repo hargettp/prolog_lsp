@@ -44,7 +44,11 @@ filter_for_docs(Range, CommentPos, DocLine, Docs) :-
 
 get_docs(Predicate, Docs) :-
   get_document_item(_URI, _Range, docs(Predicate, _DocLine, Comment)),
-  comment_markup(Predicate, Comment, Docs).
+  comment_markup(Predicate, Comment, Docs),
+  !.
+
+ get_docs(Predicate, Docs) :-
+  swritef(Docs, "### %w\n*No documentation available.*",[Predicate]).
 
 comment_markup(Predicate, Comment, Markup) :-
   is_structured_comment(Comment, Prefixes),
@@ -61,7 +65,7 @@ comment_markup(Predicate, Comment, Markup) :-
     ),
   with_output_to(string(Markup),
     (
-      writef("**%w**\n\n",[Predicate]),
+      writef("### %w\n",[Predicate]),
       forall(member(String, Strings),writeln(String))
       )
     ).
