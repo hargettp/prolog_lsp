@@ -92,6 +92,16 @@ index_term(URI, Pos, (Head :- Body)) :-
   index_goals(URI, Caller, BodyPos, Body),
   !.
 
+index_term(URI, Pos, (Head --> Body)) :-
+  functor(Head, Name, Arity),
+  Caller = Name//Arity,
+  term_position_subpos(Pos, [HeadPos, BodyPos]),
+  term_position_range(URI, HeadPos, Range),
+  add_document_item(URI, Range, defines(Caller)),
+  index_goals(URI, Caller, BodyPos, Body),
+  !.
+
+
 %! index_comments(+URI, +CommentPos, +TermPos) is nondet.
 %
 % Index the documentation for the term at the indicated TermPos,
@@ -130,8 +140,10 @@ index_goal(URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal)
 
 index_goal(URI, Caller, term_position(_From, _To, FFrom, FTo, _Subpos), Goal) :-
   functor_range(URI, FFrom, FTo, Range),
-  functor(Goal, Name, Arity),
-  Predicate = Name/Arity,
+  ( Caller = _Name // _Arity
+    -> ( functor(Goal, Name, Arity), Predicate = Name//Arity) 
+    ; ( functor(Goal, Name, Arity), Predicate = Name/Arity)
+    ),
   Item = references(Caller, Predicate),
   debug("Adding item %w",[Item]),
   add_document_item(URI, Range, Item) .
