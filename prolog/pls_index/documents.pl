@@ -5,6 +5,7 @@
   add_document_property/2,
   set_document_property/2,
   get_document_property/2,
+  clear_document_property/2,
   clear_document_properties/1,
 
   get_document_uri/1,

@@ -8,6 +8,7 @@
 
 :- use_module(documents).
 :- use_module(docs).
+:- use_module(profiles).
 
 % Index the terms in a file, including subterms.
 % A file or document is a sequence of terms, and
@@ -49,9 +50,9 @@ index_term(URI, Pos, (:- module(Module, Exports))) :-
   term_position_range(URI, Pos, Range),
   add_document_item(URI, Range, module(Module, Exports)),
   % Arg of :-, which is the term position for module
-  term_position_subpos(Pos, [DirectiveArgPos]),
+  argument_positions(Pos, [DirectiveArgPos]),
   % Args of module: first is the name, second is export list
-  term_position_subpos(DirectiveArgPos, [_,list_position(_,_,ExportPosList, _)]),
+  argument_positions(DirectiveArgPos, [_,list_position(_,_,ExportPosList, _)]),
   index_exports(URI, Exports, ExportPosList),
   !.
 
@@ -86,7 +87,7 @@ index_term(URI, Pos, (_Module:Head :- Body)) :-
 index_term(URI, Pos, (Head :- Body)) :-
   functor(Head, Name, Arity),
   Caller = Name/Arity,
-  term_position_subpos(Pos, [HeadPos, BodyPos]),
+  argument_positions(Pos, [HeadPos, BodyPos]),
   term_position_range(URI, HeadPos, Range),
   add_document_item(URI, Range, defines(Caller)),
   index_goals(URI, Caller, BodyPos, Body),
@@ -95,7 +96,7 @@ index_term(URI, Pos, (Head :- Body)) :-
 index_term(URI, Pos, (Head --> Body)) :-
   functor(Head, Name, Arity),
   Caller = Name//Arity,
-  term_position_subpos(Pos, [HeadPos, BodyPos]),
+  argument_positions(Pos, [HeadPos, BodyPos]),
   term_position_range(URI, HeadPos, Range),
   add_document_item(URI, Range, defines(Caller)),
   index_goals(URI, Caller, BodyPos, Body),
@@ -182,4 +183,4 @@ term_range(URI, From, To, Range) :-
       }
     }.
 
-term_position_subpos(term_position(_From, _To, _FFrom, _FTo, Subpos), Subpos).
+argument_positions(term_position(_From, _To, _FFrom, _FTo, Subpos), Subpos).
