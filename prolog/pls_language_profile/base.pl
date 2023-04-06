@@ -1,3 +1,3 @@
-:- module(pls_language_support_profile_base, [
+:- module(pls_language_profile_base, [
 
 ]).

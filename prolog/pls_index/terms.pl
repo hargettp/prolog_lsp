@@ -155,32 +155,3 @@ index_goal(URI, Caller, term_position(_From, _To, _FFrom, _FTo, Subpos), Goal) :
   arg(Index, Goal, Arg),
   nth1(Index, Subpos, Pos),
   index_goal(URI, Caller, Pos, Arg).
-
-functor_range(URI, term_position(_From, _To, FFrom, FTo, _Subpos), Range) :-
-  term_range(URI, FFrom, FTo, Range).
-
-functor_range(URI, FFrom, FTo, Range) :-
-  term_range(URI, FFrom, FTo, Range).
-
-term_position_range(URI, term_position(From, To, _FFrom, _FTo, _Subpos), Range) :-
-  term_range(URI, From, To, Range).
-
-term_range(URI, From, To, Range) :-
-  get_document_line_position(URI, FromLine, From),
-  get_document_line_position(URI, FromLine, FromStart),
-  get_document_line_position(URI, ToLine, To),
-  get_document_line_position(URI, ToLine, ToStart),
-  FromPosition is From - FromStart,
-  ToPosition is To - ToStart,
-  Range = range{
-    start: position{
-      line: FromLine,
-      character: FromPosition
-      }, 
-    end: position{
-      line: ToLine, 
-      character: ToPosition
-      }
-    }.
-
-argument_positions(term_position(_From, _To, _FFrom, _FTo, Subpos), Subpos).
