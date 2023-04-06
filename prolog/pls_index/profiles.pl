@@ -2,6 +2,13 @@
   use_language_profile/1,
   ensure_profile_loaded/1,
   get_document_profile/2,
+  set_document_profile/2,
+
+  profile_index_term/4,
+  profile_index_comments/5,
+  profile_index_signature/5,
+
+  index_goals/4,
 
   functor_range/3,
   functor_range/4,
@@ -10,9 +17,23 @@
   argument_positions/2
 ]).
 
+:- use_module(library(log4p)).
 :- use_module(documents).
 
 user:file_search_path(pls_language_profile,library(pls_language_profile)).
+
+% 
+% Interface to profiles
+% 
+
+% profile_index_term(Profile, URI, SubPos, Term)
+:- multifile profile_index_term/4.
+
+% profile_index_comments(Profile, URI, SubPos, Term, CommentPos)
+:- multifile profile_index_comments/5.
+
+% profile_index_signature(Profile, URI, SubPos, Term, Vars)
+:- multifile profile_index_signature/5.
 
 %! use_language_profile(+Profile) is det.
 %
@@ -44,8 +65,38 @@ get_document_profile(URI, Profile) :-
 
 get_document_profile(_URI, base).
 
+set_document_profile(URI, Profile) :-
+  set_document_property(URI, profile(Profile)).
+
 % 
-%  -- helpers --
+% goals
+% 
+index_goals(URI, Caller, GoalPos, Goal) :-
+  forall(index_goal(URI, Caller, GoalPos, Goal), true).
+
+index_goal(URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal) :-
+  index_goal(URI, Caller, ContentPos, Goal).
+
+index_goal(URI, Caller, term_position(_From, _To, FFrom, FTo, _Subpos), Goal) :-
+  functor_range(URI, FFrom, FTo, Range),
+  ( Caller = _Name // _Arity
+    -> ( functor(Goal, Name, Arity), Predicate = Name//Arity) 
+    ; ( functor(Goal, Name, Arity), Predicate = Name/Arity)
+    ),
+  Item = references(Caller, Predicate),
+  debug("Adding item %w",[Item]),
+  add_document_item(URI, Range, Item) .
+
+index_goal(URI, Caller, term_position(_From, _To, _FFrom, _FTo, Subpos), Goal) :-
+  functor(Goal, _Name, Arity),
+  between(1, Arity, Index),
+  arg(Index, Goal, Arg),
+  nth1(Index, Subpos, Pos),
+  index_goal(URI, Caller, Pos, Arg).
+
+
+% 
+%  -- position helpers --
 % 
 
 functor_range(URI, term_position(_From, _To, FFrom, FTo, _Subpos), Range) :-
