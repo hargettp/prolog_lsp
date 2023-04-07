@@ -7,8 +7,10 @@
   profile_index_term/4,
   profile_index_comments/5,
   profile_index_signature/5,
+  profile_index_goal/6,
 
   index_goals/4,
+  index_goal/4,
 
   functor_range/3,
   functor_range/4,
@@ -34,6 +36,9 @@ user:file_search_path(pls_language_profile,library(pls_language_profile)).
 
 % profile_index_signature(Profile, URI, SubPos, Term, Vars)
 :- multifile profile_index_signature/5.
+
+% profile_index_goal(Profile, URI, Caller, GoalPos, Goal)
+:- multifile profile_index_goal/6.
 
 %! use_language_profile(+Profile) is det.
 %
@@ -74,26 +79,9 @@ set_document_profile(URI, Profile) :-
 index_goals(URI, Caller, GoalPos, Goal) :-
   forall(index_goal(URI, Caller, GoalPos, Goal), true).
 
-index_goal(URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal) :-
-  index_goal(URI, Caller, ContentPos, Goal).
-
-index_goal(URI, Caller, term_position(_From, _To, FFrom, FTo, _Subpos), Goal) :-
-  functor_range(URI, FFrom, FTo, Range),
-  ( Caller = _Name // _Arity
-    -> ( functor(Goal, Name, Arity), Predicate = Name//Arity) 
-    ; ( functor(Goal, Name, Arity), Predicate = Name/Arity)
-    ),
-  Item = references(Caller, Predicate),
-  debug("Adding item %w",[Item]),
-  add_document_item(URI, Range, Item) .
-
-index_goal(URI, Caller, term_position(_From, _To, _FFrom, _FTo, Subpos), Goal) :-
-  functor(Goal, _Name, Arity),
-  between(1, Arity, Index),
-  arg(Index, Goal, Arg),
-  nth1(Index, Subpos, Pos),
-  index_goal(URI, Caller, Pos, Arg).
-
+index_goal(URI, Caller, GoalPos, Goal) :-
+  get_document_profile(URI, Profile),
+  profile_index_goal(Profile, URI, Caller, GoalPos, Goal).
 
 % 
 %  -- position helpers --

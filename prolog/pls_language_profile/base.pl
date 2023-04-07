@@ -2,6 +2,7 @@
 
 ]).
 
+:- use_module(library(log4p)).
 :- use_module('../pls_index').
 
 %! index_term(+URI, +Pos, +Term) is nondet.
@@ -84,6 +85,29 @@ pls_index_profiles:profile_index_signature(base, URI, Pos, Head :- _Body, Vars) 
   add_document_item(URI, Range, signature(Name/Arity, Signature)).
 
 pls_index_profiles:profile_index_signature(base, _, _, _, _).
+
+%! 
+% 
+% 
+pls_index_profiles:profile_index_goal(base, URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal) :-
+  index_goal(URI, Caller, ContentPos, Goal).
+
+pls_index_profiles:profile_index_goal(base, URI, Caller, term_position(_From, _To, FFrom, FTo, _Subpos), Goal) :-
+  functor_range(URI, FFrom, FTo, Range),
+  ( Caller = _Name // _Arity
+    -> ( functor(Goal, Name, Arity), Predicate = Name//Arity) 
+    ; ( functor(Goal, Name, Arity), Predicate = Name/Arity)
+    ),
+  Item = references(Caller, Predicate),
+  debug("Adding item %w",[Item]),
+  add_document_item(URI, Range, Item) .
+
+pls_index_profiles:profile_index_goal(base, URI, Caller, term_position(_From, _To, _FFrom, _FTo, Subpos), Goal) :-
+  functor(Goal, _Name, Arity),
+  between(1, Arity, Index),
+  arg(Index, Goal, Arg),
+  nth1(Index, Subpos, Pos),
+  index_goal(URI, Caller, Pos, Arg).
 
 %! index_exports(+URI, +Exports, +ExportPosList) is nondet.
 %
