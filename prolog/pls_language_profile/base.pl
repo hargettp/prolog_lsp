@@ -66,6 +66,19 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (Head --> Body)) :-
   index_goals(URI, Caller, BodyPos, Body),
   !.
 
+pls_index_profiles:profile_index_term(base, URI, Pos, _Module:Term) :-  
+  pls_index_profiles:profile_index_term(base, URI, Pos, Term),
+  !.
+
+pls_index_profiles:profile_index_term(base, URI, Pos, Term) :-  
+  functor(Term, Name, Arity),
+  atom_codes(Name, [Initial|_]),
+  code_type(Initial, prolog_atom_start),
+  Caller = Name/Arity,
+  term_position_range(URI, Pos, Range),
+  add_document_item(URI, Range, defines(Caller)),
+  !.
+
 pls_index_profiles:profile_index_docs(base, URI, SubPos, _Module:Head :- Body, CommentPos) :-
   pls_index_profiles:profile_index_docs(base, URI, SubPos, Head :- Body, CommentPos),
   !.
