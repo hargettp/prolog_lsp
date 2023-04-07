@@ -46,7 +46,7 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (:- include(FileSpec) )) :
   !.
 
 pls_index_profiles:profile_index_term(base, URI, Pos, (_Module:Head :- Body)) :-
-  index_term(URI, Pos, (Head :- Body)).
+  pls_index_profiles:profile_index_term(base, URI, Pos, (Head :- Body)).
 
 pls_index_profiles:profile_index_term(base, URI, Pos, (Head :- Body)) :-
   functor(Head, Name, Arity),
@@ -66,11 +66,6 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (Head --> Body)) :-
   index_goals(URI, Caller, BodyPos, Body),
   !.
 
-%! index_comments(+URI, +CommentPos, +TermPos) is nondet.
-%
-% Index the documentation for the term at the indicated TermPos,
-% using the CommentPos from an earlier `read_term/3` call.
-%
 pls_index_profiles:profile_index_comments(base, URI, SubPos, Term, CommentPos) :-
   term_position_range(URI, SubPos, Range),
   index_docs(URI, Term, Range, CommentPos),
@@ -86,9 +81,6 @@ pls_index_profiles:profile_index_signature(base, URI, Pos, Head :- _Body, Vars) 
 
 pls_index_profiles:profile_index_signature(base, _, _, _, _).
 
-%! 
-% 
-% 
 pls_index_profiles:profile_index_goal(base, URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal) :-
   index_goal(URI, Caller, ContentPos, Goal).
 

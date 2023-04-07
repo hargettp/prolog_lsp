@@ -43,7 +43,28 @@ process_term(URI, _SubPos, (:- use_language_profile(Profile)), _CommentPos, _Var
 process_term(URI, SubPos, Term, CommentPos, Vars) :-
   get_document_profile(URI, Profile),
   ensure_profile_loaded(Profile),
+  try_profile_index_term(Profile, URI, SubPos, Term),
+  try_profile_index_comments(Profile, URI, SubPos, Term, CommentPos),
+  try_profile_index_signature(Profile, URI, SubPos, Term, Vars),
+  !.
+
+try_profile_index_term(Profile, URI, SubPos, Term) :-
   pls_index_profiles:profile_index_term(Profile, URI, SubPos, Term),
+  !.
+
+try_profile_index_term(_Profile, URI, SubPos, Term) :-
+  pls_index_profiles:profile_index_term(base, URI, SubPos, Term).
+
+try_profile_index_comments(Profile, URI, SubPos, Term, CommentPos) :-
   pls_index_profiles:profile_index_comments(Profile, URI, SubPos, Term, CommentPos),
+  !.
+
+try_profile_index_comments(_Profile, URI, SubPos, Term, CommentPos) :-
+  pls_index_profiles:profile_index_comments(base, URI, SubPos, Term, CommentPos).
+
+try_profile_index_signature(Profile, URI, SubPos, Term, Vars) :-
   pls_index_profiles:profile_index_signature(Profile, URI, SubPos, Term, Vars),
   !.
+
+try_profile_index_signature(_Profile, URI, SubPos, Term, Vars) :-
+  pls_index_profiles:profile_index_signature(base, URI, SubPos, Term, Vars).

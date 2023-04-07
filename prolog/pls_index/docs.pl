@@ -26,6 +26,12 @@ index_docs(URI, Head :- _Body, Range, CommentPos) :-
 
 index_docs(_URI, _Term, _Range, _CommentPos, _TermPos).
 
+%! filter_for_docs(+Range, +CommentPos, -DocLine, -Docs) is nondet.
+%
+% Return the line where docs start and the docs (e.g., multi-line string 
+% comments) that precede the provided range. This separates comments
+% for documentation from comments that are interior to the definition,
+% and thus comments and not documentation.
 filter_for_docs(Range, CommentPos, DocLine, Docs) :-
   findall(
     Line-Comment,

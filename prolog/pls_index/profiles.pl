@@ -31,13 +31,20 @@ user:file_search_path(pls_language_profile,library(pls_language_profile)).
 % profile_index_term(Profile, URI, SubPos, Term)
 :- multifile profile_index_term/4.
 
-% profile_index_comments(Profile, URI, SubPos, Term, CommentPos)
+%! profile_index_comments(+Profile, +URI, +CommentPos, +TermPos) is nondet.
+%
+% Index the documentation for the term at the indicated TermPos,
+% using the CommentPos from an earlier `read_term/3` call.
+%
 :- multifile profile_index_comments/5.
 
 % profile_index_signature(Profile, URI, SubPos, Term, Vars)
 :- multifile profile_index_signature/5.
 
-% profile_index_goal(Profile, URI, Caller, GoalPos, Goal)
+%! profile_index_goal(+Profile, ?URI, ?Caller, ?SubPos, ?Goal) is nondet.
+% 
+% Index a goal for cross-referncing
+% 
 :- multifile profile_index_goal/6.
 
 %! use_language_profile(+Profile) is det.
