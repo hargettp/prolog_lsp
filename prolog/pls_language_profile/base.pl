@@ -109,6 +109,8 @@ pls_index_profiles:profile_index_goal(base, URI, Caller, term_position(_From, _T
   nth1(Index, Subpos, Pos),
   index_goal(URI, Caller, Pos, Arg).
 
+pls_index_profiles:profile_end_of_file(base, _URI).  
+
 %! index_exports(+URI, +Exports, +ExportPosList) is nondet.
 %
 % Index the exports in a module declaration.

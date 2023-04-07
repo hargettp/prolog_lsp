@@ -32,7 +32,7 @@ index_term(URI) :-
       ]),
     ( Term \== end_of_file
       -> process_term(URI, SubPos, Term, CommentPos, Vars)
-      ; (!, fail)
+      ; (try_process_end_of_file(URI), !, fail)
       )
     )).
 
@@ -68,3 +68,12 @@ try_profile_index_signature(Profile, URI, SubPos, Term, Vars) :-
 
 try_profile_index_signature(_Profile, URI, SubPos, Term, Vars) :-
   pls_index_profiles:profile_index_signature(base, URI, SubPos, Term, Vars).
+
+try_process_end_of_file(URI) :-
+  get_document_profile(URI, Profile),
+  ensure_profile_loaded(Profile),
+  pls_index_profiles:profile_end_of_file(Profile, URI),
+  !.
+
+try_process_end_of_file(URI) :-
+  pls_index_profiles:profile_end_of_file(base, URI).

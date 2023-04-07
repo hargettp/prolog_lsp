@@ -47,6 +47,12 @@ user:file_search_path(pls_language_profile,library(pls_language_profile)).
 % 
 :- multifile profile_index_goal/6.
 
+%! profile_end_of_file(Profile, URI) is nondet.
+%
+% Allow the profile to cleanup after indexing a file.
+%
+:- multifile profile_end_of_file/2.
+
 %! use_language_profile(+Profile) is det.
 %
 % Directive to indicate which language profile to use when indexing
