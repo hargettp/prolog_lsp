@@ -48,6 +48,12 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (:- include(FileSpec) )) :
 pls_index_profiles:profile_index_term(base, URI, Pos, (_Module:Head :- Body)) :-
   pls_index_profiles:profile_index_term(base, URI, Pos, (Head :- Body)).
 
+pls_index_profiles:profile_index_term(base, URI, Pos, :- Declaration ) :-
+  Declaration =.. [Directive, Arg],
+  member(Directive, [dynamic, multifile, discontiguous]),
+  argument_positions(Pos, [ArgPos]),
+  index_declaration(URI, ArgPos, Directive, Arg).
+
 pls_index_profiles:profile_index_term(base, URI, Pos, (Head :- Body)) :-
   functor(Head, Name, Arity),
   Caller = Name/Arity,
@@ -102,6 +108,18 @@ pls_index_profiles:profile_index_signature(base, URI, Pos, Head :- _Body, Vars) 
 
 pls_index_profiles:profile_index_signature(base, _, _, _, _).
 
+pls_index_profiles:profile_index_goal(base, URI, Caller, SubPos, (Goal, MoreGoals) ) :-
+  info("In %w indexing goal %w",[URI, Goal]),
+  argument_positions(SubPos, [GoalPos, MoreGoalsPos]),
+  index_goal(URI, Caller, GoalPos, Goal),
+  !,
+  index_goal(URI, Caller, MoreGoalsPos, MoreGoals).
+
+pls_index_profiles:profile_index_goal(base, URI, Caller, SubPos, _Module:Goal) :-
+  argument_positions(SubPos, [_ModulePos, GoalPos]),
+  index_goal(URI, Caller, GoalPos, Goal),
+  !.
+
 pls_index_profiles:profile_index_goal(base, URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal) :-
   index_goal(URI, Caller, ContentPos, Goal).
 
@@ -123,6 +141,20 @@ pls_index_profiles:profile_index_goal(base, URI, Caller, term_position(_From, _T
   index_goal(URI, Caller, Pos, Arg).
 
 pls_index_profiles:profile_end_of_file(base, _URI).  
+
+%! index_declaration(+URI, +Pos, +Directive, _Caller) is det.
+%
+% Index a declaration from a directive.
+%
+index_declaration(URI, Pos, Directive, (Caller, MoreCallers)) :-
+  argument_positions(Pos, [ArgPos, MoreArgsPos]),
+  index_declaration(URI, ArgPos, Directive, Caller),
+  index_declaration(URI, MoreArgsPos, Directive, MoreCallers).
+
+index_declaration(URI, Pos, _Directive, Caller) :-
+  argument_positions(Pos, [ArgPos]),
+  term_position_range(URI, ArgPos, Range),
+  add_document_item(URI, Range, defines(Caller)).
 
 %! index_exports(+URI, +Exports, +ExportPosList) is nondet.
 %

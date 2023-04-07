@@ -7,7 +7,7 @@
   profile_index_term/4,
   profile_index_docs/5,
   profile_index_signature/5,
-  profile_index_goal/6,
+  profile_index_goal/5,
 
   index_goals/4,
   index_goal/4,
@@ -45,7 +45,7 @@ user:file_search_path(pls_language_profile,library(pls_language_profile)).
 % 
 % Index a goal for cross-referncing
 % 
-:- multifile profile_index_goal/6.
+:- multifile profile_index_goal/5.
 
 %! profile_end_of_file(Profile, URI) is nondet.
 %

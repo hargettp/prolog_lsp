@@ -17,8 +17,8 @@
 :- use_module(library(log4p)).
 
 :- multifile
-  jsonrpc_protocol:on_message_read/1,
-  jsonrpc_protocol:on_message_write/1.
+  on_message_read/1,
+  on_message_write/1.
 
 read_message(In, Message) :-
   setup_and_call_cleanup(
