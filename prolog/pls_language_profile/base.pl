@@ -66,10 +66,18 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (Head --> Body)) :-
   index_goals(URI, Caller, BodyPos, Body),
   !.
 
-pls_index_profiles:profile_index_comments(base, URI, SubPos, Term, CommentPos) :-
-  term_position_range(URI, SubPos, Range),
-  index_docs(URI, Term, Range, CommentPos),
+pls_index_profiles:profile_index_docs(base, URI, SubPos, _Module:Head :- Body, CommentPos) :-
+  pls_index_profiles:profile_index_docs(base, URI, SubPos, Head :- Body, CommentPos),
   !.
+
+pls_index_profiles:profile_index_docs(base, URI, SubPos, Head :- _Body, CommentPos) :-
+  term_position_range(URI, SubPos, Range),  
+  functor(Head, Name, Arity),
+  Predicate = Name/Arity,
+  index_docs(URI, Predicate, Range, CommentPos),
+  !.
+
+pls_index_profiles:profile_index_docs(base, _URI, _SubPos, _Term, _CommentPos).
 
 pls_index_profiles:profile_index_signature(base, URI, Pos, Head :- _Body, Vars) :-
   with_output_to(string(Signature),

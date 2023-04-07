@@ -5,7 +5,7 @@
   set_document_profile/2,
 
   profile_index_term/4,
-  profile_index_comments/5,
+  profile_index_docs/5,
   profile_index_signature/5,
   profile_index_goal/6,
 
@@ -31,12 +31,12 @@ user:file_search_path(pls_language_profile,library(pls_language_profile)).
 % profile_index_term(Profile, URI, SubPos, Term)
 :- multifile profile_index_term/4.
 
-%! profile_index_comments(+Profile, +URI, +CommentPos, +TermPos) is nondet.
+%! profile_index_docs(+Profile, +URI, +SubPos, Term, +CommentPos) is nondet.
 %
-% Index the documentation for the term at the indicated TermPos,
+% Index the documentation for the term at the indicated SubPos,
 % using the CommentPos from an earlier `read_term/3` call.
 %
-:- multifile profile_index_comments/5.
+:- multifile profile_index_docs/5.
 
 % profile_index_signature(Profile, URI, SubPos, Term, Vars)
 :- multifile profile_index_signature/5.
