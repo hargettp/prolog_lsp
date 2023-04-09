@@ -19,6 +19,6 @@ get_definitions(Predicate, Definitions) :-
       uri: DefURI,
       range: DefRange
       }, 
-    get_document_item(DefURI, DefRange, defines(Predicate)), 
+    get_document_item(DefURI, DefRange, defines(Predicate)),
     Definitions
     ).

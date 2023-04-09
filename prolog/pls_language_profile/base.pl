@@ -108,13 +108,6 @@ pls_index_profiles:profile_index_signature(base, URI, Pos, Head :- _Body, Vars) 
 
 pls_index_profiles:profile_index_signature(base, _, _, _, _).
 
-pls_index_profiles:profile_index_goal(base, URI, Caller, SubPos, (Goal, MoreGoals) ) :-
-  info("In %w indexing goal %w",[URI, Goal]),
-  argument_positions(SubPos, [GoalPos, MoreGoalsPos]),
-  index_goal(URI, Caller, GoalPos, Goal),
-  !,
-  index_goal(URI, Caller, MoreGoalsPos, MoreGoals).
-
 pls_index_profiles:profile_index_goal(base, URI, Caller, SubPos, _Module:Goal) :-
   argument_positions(SubPos, [_ModulePos, GoalPos]),
   index_goal(URI, Caller, GoalPos, Goal),
@@ -129,6 +122,8 @@ pls_index_profiles:profile_index_goal(base, URI, Caller, term_position(_From, _T
     -> ( functor(Goal, Name, Arity), Predicate = Name//Arity) 
     ; ( functor(Goal, Name, Arity), Predicate = Name/Arity)
     ),
+  % Don't index references to this common fuctor, because its everywhere
+  Name \= ',',
   Item = references(Caller, Predicate),
   debug("Adding item %w",[Item]),
   add_document_item(URI, Range, Item) .
@@ -146,15 +141,15 @@ pls_index_profiles:profile_end_of_file(base, _URI).
 %
 % Index a declaration from a directive.
 %
-index_declaration(URI, Pos, Directive, (Caller, MoreCallers)) :-
+index_declaration(URI, Pos, Directive, (Predicate, MorePredicates)) :-
   argument_positions(Pos, [ArgPos, MoreArgsPos]),
-  index_declaration(URI, ArgPos, Directive, Caller),
-  index_declaration(URI, MoreArgsPos, Directive, MoreCallers).
+  index_declaration(URI, ArgPos, Directive, Predicate),
+  index_declaration(URI, MoreArgsPos, Directive, MorePredicates).
 
-index_declaration(URI, Pos, _Directive, Caller) :-
+index_declaration(URI, Pos, _Directive, Predicate) :-
   argument_positions(Pos, [ArgPos]),
   term_position_range(URI, ArgPos, Range),
-  add_document_item(URI, Range, defines(Caller)).
+  add_document_item(URI, Range, defines(Predicate)).
 
 %! index_exports(+URI, +Exports, +ExportPosList) is nondet.
 %

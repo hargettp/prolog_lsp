@@ -100,6 +100,10 @@ index_goal(URI, Caller, GoalPos, Goal) :-
 %  -- position helpers --
 % 
 
+%! functor_range(+URI, +Pos, -Range) is det.
+%
+% Given the position of a term, return the range for the functor.
+%
 functor_range(URI, term_position(_From, _To, FFrom, FTo, _Subpos), Range) :-
   term_range(URI, FFrom, FTo, Range).
 
@@ -109,6 +113,12 @@ functor_range(URI, FFrom, FTo, Range) :-
 term_position_range(URI, term_position(From, To, _FFrom, _FTo, _Subpos), Range) :-
   term_range(URI, From, To, Range).
 
+%! term_range(+URI, +From, +To, -Range) is det.
+%
+% Given a From position and To position in the text of the document
+% specified by URI, return a Ranage, which expresses as a start / end 
+% pair of locations. Each location has a line number and character offset.
+% 
 term_range(URI, From, To, Range) :-
   get_document_line_position(URI, FromLine, From),
   get_document_line_position(URI, FromLine, FromStart),
