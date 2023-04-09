@@ -3,7 +3,10 @@
 :- use_module(lines).
 :- use_module(documents).
 
+:- use_module(library(log4p)).
+
 test(index_lines) :-
+  format("starting line indexing test~n"),
   uri_file_name(URI, 'test.pl'),
   index_lines(URI),
   findall(Count, get_document_line_count(URI, Count), [11]),

@@ -8,6 +8,7 @@
 
 :- use_module(documents).
 :- use_module(docs).
+:- use_module(profiles).
 
 % Index the terms in a file, including subterms.
 % A file or document is a sequence of terms, and
@@ -30,156 +31,49 @@ index_term(URI) :-
       variable_names(Vars)
       ]),
     ( Term \== end_of_file
-      -> (
-          index_term(URI, SubPos, Term),
-          term_position_range(URI, SubPos, Range),
-          index_comments(URI, Term, Range, CommentPos),
-          index_signature(URI, SubPos, Term, Vars)
-          )
-      ; (!, fail)
+      -> process_term(URI, SubPos, Term, CommentPos, Vars)
+      ; (try_process_end_of_file(URI), !, fail)
       )
     )).
 
-%! index_term(+URI, +Pos, +Term) is nondet.
-%
-% Indexing the term at the indicated Position in the
-% source with the indicated URI.
-%
-index_term(URI, Pos, (:- module(Module, Exports))) :-
-  term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, module(Module, Exports)),
-  % Arg of :-, which is the term position for module
-  term_position_subpos(Pos, [DirectiveArgPos]),
-  % Args of module: first is the name, second is export list
-  term_position_subpos(DirectiveArgPos, [_,list_position(_,_,ExportPosList, _)]),
-  index_exports(URI, Exports, ExportPosList),
+process_term(URI, _SubPos, (:- use_language_profile(Profile)), _CommentPos, _Vars) :-
+  set_document_profile(URI, Profile),
   !.
 
-index_term(URI, Pos, (:- use_module(Module))) :-
-  term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, uses(Module)),
+process_term(URI, SubPos, Term, CommentPos, Vars) :-
+  get_document_profile(URI, Profile),
+  ensure_profile_loaded(Profile),
+  try_profile_index_term(Profile, URI, SubPos, Term),
+  try_profile_index_docs(Profile, URI, SubPos, Term, CommentPos),
+  try_profile_index_signature(Profile, URI, SubPos, Term, Vars),
   !.
 
-index_term(URI, Pos, (:- reexport(Module))) :-
-  term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, reexports(Module)),
+try_profile_index_term(Profile, URI, SubPos, Term) :-
+  pls_index_profiles:profile_index_term(Profile, URI, SubPos, Term),
   !.
 
-index_term(URI, Pos, (:- reexport(Module, Imports))) :-
-  term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, reexports(Module,Imports)),
+try_profile_index_term(_Profile, URI, SubPos, Term) :-
+  pls_index_profiles:profile_index_term(base, URI, SubPos, Term).
+
+try_profile_index_docs(Profile, URI, SubPos, Term, CommentPos) :-
+  pls_index_profiles:profile_index_docs(Profile, URI, SubPos, Term, CommentPos),
   !.
 
-index_term(URI, Pos, (:- [FileSpec])) :-
-  term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, loads(FileSpec)),
+try_profile_index_docs(_Profile, URI, SubPos, Term, CommentPos) :-
+  pls_index_profiles:profile_index_docs(base, URI, SubPos, Term, CommentPos).
+
+try_profile_index_signature(Profile, URI, SubPos, Term, Vars) :-
+  pls_index_profiles:profile_index_signature(Profile, URI, SubPos, Term, Vars),
   !.
 
-index_term(URI, Pos, (:- include(FileSpec) )) :-
-  term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, includes(FileSpec)),
+try_profile_index_signature(_Profile, URI, SubPos, Term, Vars) :-
+  pls_index_profiles:profile_index_signature(base, URI, SubPos, Term, Vars).
+
+try_process_end_of_file(URI) :-
+  get_document_profile(URI, Profile),
+  ensure_profile_loaded(Profile),
+  pls_index_profiles:profile_end_of_file(Profile, URI),
   !.
 
-index_term(URI, Pos, (_Module:Head :- Body)) :-
-  index_term(URI, Pos, (Head :- Body)).
-
-index_term(URI, Pos, (Head :- Body)) :-
-  functor(Head, Name, Arity),
-  Caller = Name/Arity,
-  term_position_subpos(Pos, [HeadPos, BodyPos]),
-  term_position_range(URI, HeadPos, Range),
-  add_document_item(URI, Range, defines(Caller)),
-  index_goals(URI, Caller, BodyPos, Body),
-  !.
-
-index_term(URI, Pos, (Head --> Body)) :-
-  functor(Head, Name, Arity),
-  Caller = Name//Arity,
-  term_position_subpos(Pos, [HeadPos, BodyPos]),
-  term_position_range(URI, HeadPos, Range),
-  add_document_item(URI, Range, defines(Caller)),
-  index_goals(URI, Caller, BodyPos, Body),
-  !.
-
-
-%! index_comments(+URI, +CommentPos, +TermPos) is nondet.
-%
-% Index the documentation for the term at the indicated TermPos,
-% using the CommentPos from an earlier `read_term/3` call.
-%
-index_comments(URI, Term, Range, CommentPos) :-
-  index_docs(URI, Term, Range, CommentPos),
-  !.
-
-index_signature(URI, Pos, Head :- _Body, Vars) :-
-  with_output_to(string(Signature),
-    write_term(Head,[variable_names(Vars)])
-    ),
-  term_position_range(URI, Pos, Range),
-  functor(Head, Name, Arity),
-  add_document_item(URI, Range, signature(Name/Arity, Signature)).
-
-index_signature(_, _, _, _).
-
-%! index_exports(+URI, +Exports, +ExportPosList) is nondet.
-%
-% Index the exports in a module declaration.
-%
-index_exports(_URI, [], []).
-
-index_exports(URI, [Export | ExportRest], [ExportPos | ExportPosListRest]) :-
-  term_position_range(URI, ExportPos, Range),
-  add_document_item(URI, Range, exports(Export)),
-  index_exports(URI, ExportRest, ExportPosListRest).
-
-index_goals(URI, Caller, GoalPos, Goal) :-
-  forall(index_goal(URI, Caller, GoalPos, Goal), true).
-
-index_goal(URI, Caller, parentheses_term_position(_From, _To, ContentPos), Goal) :-
-  index_goal(URI, Caller, ContentPos, Goal).
-
-index_goal(URI, Caller, term_position(_From, _To, FFrom, FTo, _Subpos), Goal) :-
-  functor_range(URI, FFrom, FTo, Range),
-  ( Caller = _Name // _Arity
-    -> ( functor(Goal, Name, Arity), Predicate = Name//Arity) 
-    ; ( functor(Goal, Name, Arity), Predicate = Name/Arity)
-    ),
-  Item = references(Caller, Predicate),
-  debug("Adding item %w",[Item]),
-  add_document_item(URI, Range, Item) .
-
-index_goal(URI, Caller, term_position(_From, _To, _FFrom, _FTo, Subpos), Goal) :-
-  functor(Goal, _Name, Arity),
-  between(1, Arity, Index),
-  arg(Index, Goal, Arg),
-  nth1(Index, Subpos, Pos),
-  index_goal(URI, Caller, Pos, Arg).
-
-functor_range(URI, term_position(_From, _To, FFrom, FTo, _Subpos), Range) :-
-  term_range(URI, FFrom, FTo, Range).
-
-functor_range(URI, FFrom, FTo, Range) :-
-  term_range(URI, FFrom, FTo, Range).
-
-term_position_range(URI, term_position(From, To, _FFrom, _FTo, _Subpos), Range) :-
-  term_range(URI, From, To, Range).
-
-term_range(URI, From, To, Range) :-
-  get_document_line_position(URI, FromLine, From),
-  get_document_line_position(URI, FromLine, FromStart),
-  get_document_line_position(URI, ToLine, To),
-  get_document_line_position(URI, ToLine, ToStart),
-  FromPosition is From - FromStart,
-  ToPosition is To - ToStart,
-  Range = range{
-    start: position{
-      line: FromLine,
-      character: FromPosition
-      }, 
-    end: position{
-      line: ToLine, 
-      character: ToPosition
-      }
-    }.
-
-term_position_subpos(term_position(_From, _To, _FFrom, _FTo, Subpos), Subpos).
+try_process_end_of_file(URI) :-
+  pls_index_profiles:profile_end_of_file(base, URI).

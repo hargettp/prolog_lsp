@@ -1,0 +1,1 @@
+:- [prolog/prolog_lsp].

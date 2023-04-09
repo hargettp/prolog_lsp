@@ -5,6 +5,7 @@
   add_document_property/2,
   set_document_property/2,
   get_document_property/2,
+  clear_document_property/2,
   clear_document_properties/1,
 
   get_document_uri/1,
@@ -188,6 +189,13 @@ with_content(URI, In, Module:Goal) :-
 add_document_line(URI, Line, Position) :-
   assertz(document_line_position(URI, Line, Position)).
 
+%! get_document_line_position(+URI, ?Line, +Position) is det.
+%! get_document_line_position(?URI, ?Line, ?Position) is det.
+% 
+% Given a position with a file, return the line where the position occurs,
+% or the reverse. Can also be useful for iterating over the starting positions
+% of lines within a file.
+%
 get_document_line_position(URI, Line, Position) :-
   ground(Position),
   get_document_line_count(URI, Max),
