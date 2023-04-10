@@ -48,6 +48,15 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (:- include(FileSpec) )) :
 pls_index_profiles:profile_index_term(base, URI, Pos, (_Module:Head :- Body)) :-
   pls_index_profiles:profile_index_term(base, URI, Pos, (Head :- Body)).
 
+pls_index_profiles:profile_index_term(base, URI, _Pos, :- use_language_profile(Profile) ) :-
+  info("Using profile %w for %w",[Profile, URI]),
+  set_document_profile(URI, Profile),
+  !.
+
+pls_index_profiles:profile_index_term(base, URI, _Pos, :- provide_language_profile(Profile) ) :-
+  uri_file_name(URI,ProfileModuleFile),
+  register_language_profile(Profile, ProfileModuleFile).
+
 pls_index_profiles:profile_index_term(base, URI, Pos, :- Declaration ) :-
   Declaration =.. [Directive, Arg],
   member(Directive, [dynamic, multifile, discontiguous]),

@@ -16,7 +16,7 @@
 :- use_module(methods).
 :- reexport(language_server).
 :- reexport(language_client).
-:- use_module(pls_index/profiles).
+:- reexport('./pls_index/profiles').
 
 % We load the base profile by default
 :- use_module(pls_language_profile/base).

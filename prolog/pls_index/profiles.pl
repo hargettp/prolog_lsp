@@ -1,5 +1,7 @@
 :- module(pls_index_profiles, [
   use_language_profile/1,
+  provide_language_profile/1,
+  register_language_profile/2,
   ensure_profile_loaded/1,
   get_document_profile/2,
   set_document_profile/2,
@@ -64,6 +66,38 @@ use_language_profile(_Profile).
 %
 % Dynamic predicate to indicate a profile has been loaded
 :- dynamic profile_loaded/1.
+
+%! provide_language_profile(+Profile) is det.
+%
+% A no-op in regular code, but is a single to the Prolog
+% Language server during indexing that the file being indexed
+% implements the indicated language profile.  
+%
+provide_language_profile(_Profile).
+
+%! register_language_profile(+Profile, +ProfileModuleFile) is det.
+%
+% Register the indicated module file as an implementation of the
+% indicated profile.
+%
+register_language_profile(Profile, ProfileModuleFile) :-
+  info("Registering language profile %w in %w",[Profile, ProfileModuleFile]),
+  registered_language_profile(Profile, ProfileModuleFile).
+
+register_language_profile(Profile, ProfileModuleFile) :-
+  assertz(registered_language_profile(Profile, ProfileModuleFile)).
+
+%! registered_language_profile(+Profile, +ProfileModuleFile) is det.
+%
+% Used to record that the indicated module file implements the
+% specified language profile. The Prolog Language Server uses this
+% track registration through register_language_profile/1, and
+% dyamically load the profile from index source.
+%
+:- dynamic registered_language_profile/2.
+
+profile_module_file(Profile, ProfileModuleFile) :-
+  registered_language_profile(Profile, ProfileModuleFile).
 
 profile_module_file(Profile, ProfileModuleFile) :-
   exists_source(pls_language_profile(Profile), ProfileModuleFile).
