@@ -6,6 +6,8 @@
 :- use_module(library(log4p)).
 :- use_module(library(prolog_stack)).
 
+:- use_module(library(prolog_source)).
+
 :- use_module(documents).
 :- use_module(docs).
 :- use_module(profiles).
@@ -24,9 +26,16 @@ index_terms(URI) :-
 index_term(URI) :-
   with_content(URI, In, (
     repeat,
+    get_document_profile(URI, Profile),
+    profile_module(Profile, ProfileModule),
+    ( ProfileModule = pls_language_profile_base
+      -> true
+      ; info("Using profile %w in %w for %w",[Profile, ProfileModule, URI])
+      ),
     read_term(In, Term, [
       syntax_errors(dec10),
       subterm_positions(SubPos), 
+      module(ProfileModule),
       comments(CommentPos),
       variable_names(Vars)
       ]),
@@ -37,6 +46,8 @@ index_term(URI) :-
     )).
 
 process_term(URI, _SubPos, (:- use_language_profile(Profile)), _CommentPos, _Vars) :-
+  profile_module(Profile, ProfileModule),
+  info("Using profile %w for %w in %w",[Profile, URI, ProfileModule]),
   set_document_profile(URI, Profile),
   !.
 

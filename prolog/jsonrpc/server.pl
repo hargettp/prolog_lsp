@@ -82,7 +82,12 @@ handle_notification(Server, _Peer, Notification) :-
   catch(
       dispatch_notification(Server, Notification.method, Notification.params),
       Exception,
-      warn("Notification %w failed: %w", [Notification.method, Exception])
+      (
+        with_output_to(string(Backtrace),
+          print_message(error, Exception)
+          ),
+        warn("Notification %w failed (%w):\nStacktrace\n%w", [Notification.method, Exception, Backtrace])
+        )
     ),
   debug("Handled notification %w", [Notification.method]).
 

@@ -3,7 +3,7 @@
 ]).
 
 :- use_module(library(log4p)).
-:- use_module('../pls_index').
+:- use_module(pls_index).
 
 %! index_term(+URI, +Pos, +Term) is nondet.
 %
@@ -12,7 +12,7 @@
 %
 pls_index_profiles:profile_index_term(base, URI, Pos, (:- module(Module, Exports))) :-
   term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, module(Module, Exports)),
+  pls_index:pls_index:add_document_item(URI, Range, module(Module, Exports)),
   % Arg of :-, which is the term position for module
   argument_positions(Pos, [DirectiveArgPos]),
   % Args of module: first is the name, second is export list
@@ -22,40 +22,34 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (:- module(Module, Exports
 
 pls_index_profiles:profile_index_term(base, URI, Pos, (:- use_module(Module))) :-
   term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, uses(Module)),
+  pls_index:add_document_item(URI, Range, uses(Module)),
   !.
 
 pls_index_profiles:profile_index_term(base, URI, Pos, (:- reexport(Module))) :-
   term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, reexports(Module)),
+  pls_index:add_document_item(URI, Range, reexports(Module)),
   !.
 
 pls_index_profiles:profile_index_term(base, URI, Pos, (:- reexport(Module, Imports))) :-
   term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, reexports(Module,Imports)),
+  pls_index:add_document_item(URI, Range, reexports(Module,Imports)),
   !.
 
 pls_index_profiles:profile_index_term(base, URI, Pos, (:- [FileSpec])) :-
   term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, loads(FileSpec)),
+  pls_index:add_document_item(URI, Range, loads(FileSpec)),
   !.
 
 pls_index_profiles:profile_index_term(base, URI, Pos, (:- include(FileSpec) )) :-
   term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, includes(FileSpec)),
+  pls_index:add_document_item(URI, Range, includes(FileSpec)),
   !.
 
 pls_index_profiles:profile_index_term(base, URI, Pos, (_Module:Head :- Body)) :-
   pls_index_profiles:profile_index_term(base, URI, Pos, (Head :- Body)).
 
-pls_index_profiles:profile_index_term(base, URI, _Pos, :- use_language_profile(Profile) ) :-
-  info("Using profile %w for %w",[Profile, URI]),
-  set_document_profile(URI, Profile),
-  !.
-
 pls_index_profiles:profile_index_term(base, URI, _Pos, :- provide_language_profile(Profile) ) :-
-  uri_file_name(URI,ProfileModuleFile),
-  register_language_profile(Profile, ProfileModuleFile).
+  register_language_profile(Profile, URI).
 
 pls_index_profiles:profile_index_term(base, URI, Pos, :- Declaration ) :-
   Declaration =.. [Directive, Arg],
@@ -68,7 +62,7 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (Head :- Body)) :-
   Caller = Name/Arity,
   argument_positions(Pos, [HeadPos, BodyPos]),
   term_position_range(URI, HeadPos, Range),
-  add_document_item(URI, Range, defines(Caller)),
+  pls_index:add_document_item(URI, Range, defines(Caller)),
   index_goals(URI, Caller, BodyPos, Body),
   !.
 
@@ -77,7 +71,7 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (Head --> Body)) :-
   Caller = Name//Arity,
   argument_positions(Pos, [HeadPos, BodyPos]),
   term_position_range(URI, HeadPos, Range),
-  add_document_item(URI, Range, defines(Caller)),
+  pls_index:add_document_item(URI, Range, defines(Caller)),
   index_goals(URI, Caller, BodyPos, Body),
   !.
 
@@ -91,7 +85,7 @@ pls_index_profiles:profile_index_term(base, URI, Pos, Term) :-
   code_type(Initial, prolog_atom_start),
   Caller = Name/Arity,
   term_position_range(URI, Pos, Range),
-  add_document_item(URI, Range, defines(Caller)),
+  pls_index:add_document_item(URI, Range, defines(Caller)),
   !.
 
 pls_index_profiles:profile_index_docs(base, URI, SubPos, _Module:Head :- Body, CommentPos) :-
@@ -113,7 +107,7 @@ pls_index_profiles:profile_index_signature(base, URI, Pos, Head :- _Body, Vars) 
     ),
   term_position_range(URI, Pos, Range),
   functor(Head, Name, Arity),
-  add_document_item(URI, Range, signature(Name/Arity, Signature)).
+  pls_index:add_document_item(URI, Range, signature(Name/Arity, Signature)).
 
 pls_index_profiles:profile_index_signature(base, _, _, _, _).
 
@@ -135,7 +129,7 @@ pls_index_profiles:profile_index_goal(base, URI, Caller, term_position(_From, _T
   Name \= ',',
   Item = references(Caller, Predicate),
   debug("Adding item %w",[Item]),
-  add_document_item(URI, Range, Item) .
+  pls_index:add_document_item(URI, Range, Item) .
 
 pls_index_profiles:profile_index_goal(base, URI, Caller, term_position(_From, _To, _FFrom, _FTo, Subpos), Goal) :-
   functor(Goal, _Name, Arity),
@@ -158,7 +152,7 @@ index_declaration(URI, Pos, Directive, (Predicate, MorePredicates)) :-
 index_declaration(URI, Pos, _Directive, Predicate) :-
   argument_positions(Pos, [ArgPos]),
   term_position_range(URI, ArgPos, Range),
-  add_document_item(URI, Range, defines(Predicate)).
+  pls_index:add_document_item(URI, Range, defines(Predicate)).
 
 %! index_exports(+URI, +Exports, +ExportPosList) is nondet.
 %
@@ -168,5 +162,5 @@ index_exports(_URI, [], []).
 
 index_exports(URI, [Export | ExportRest], [ExportPos | ExportPosListRest]) :-
   term_position_range(URI, ExportPos, Range),
-  add_document_item(URI, Range, exports(Export)),
+  pls_index:add_document_item(URI, Range, exports(Export)),
   index_exports(URI, ExportRest, ExportPosListRest).

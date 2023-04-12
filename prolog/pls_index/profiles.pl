@@ -2,6 +2,7 @@
   use_language_profile/1,
   provide_language_profile/1,
   register_language_profile/2,
+  profile_module/2,
   ensure_profile_loaded/1,
   get_document_profile/2,
   set_document_profile/2,
@@ -60,7 +61,9 @@ user:file_search_path(pls_language_profile,library(pls_language_profile)).
 % Directive to indicate which language profile to use when indexing
 % source. The specified profile applies to the end of the file, or
 % until the next such directive.
-use_language_profile(_Profile).
+use_language_profile(_Profile) :- true.
+
+:- meta_predicate use_language_profile(:).
 
 %! profile_loaded(+Profile) is det.
 %
@@ -80,12 +83,14 @@ provide_language_profile(_Profile).
 % Register the indicated module file as an implementation of the
 % indicated profile.
 %
-register_language_profile(Profile, ProfileModuleFile) :-
-  info("Registering language profile %w in %w",[Profile, ProfileModuleFile]),
-  registered_language_profile(Profile, ProfileModuleFile).
+register_language_profile(Profile, ProfileURI) :-
+  registered_language_profile(Profile, ProfileURI),
+  info("Language profile %w in %w already registered",[Profile, ProfileURI]).
 
-register_language_profile(Profile, ProfileModuleFile) :-
-  assertz(registered_language_profile(Profile, ProfileModuleFile)).
+register_language_profile(Profile, ProfileURI) :-
+  info("Registering language profile %w in %w",[Profile, ProfileURI]),
+  assertz(registered_language_profile(Profile, ProfileURI)),
+  reindex_for_profile(Profile).
 
 %! registered_language_profile(+Profile, +ProfileModuleFile) is det.
 %
@@ -96,18 +101,28 @@ register_language_profile(Profile, ProfileModuleFile) :-
 %
 :- dynamic registered_language_profile/2.
 
-profile_module_file(Profile, ProfileModuleFile) :-
-  registered_language_profile(Profile, ProfileModuleFile).
+profile_module(Profile, Module) :-
+  profile_module_file(Profile, ProfileURI),
+  get_document_item(ProfileURI, _Range, module(Module, _Exports)),
+  info("Profile %w is in module %w",[Profile, Module]),
+  !.
 
-profile_module_file(Profile, ProfileModuleFile) :-
-  exists_source(pls_language_profile(Profile), ProfileModuleFile).
+profile_module(_Profile, Module) :-
+  Module = pls_language_profile_base.
+
+profile_module_file(Profile, ProfileURI) :-
+  registered_language_profile(Profile, ProfileURI).
+
+profile_module_file(Profile, ProfileURI) :-
+  exists_source(pls_language_profile(Profile), ProfileURI).
 
 ensure_profile_loaded(Profile) :-
   profile_loaded(Profile), 
   !.
 
 ensure_profile_loaded(Profile) :-
-  once(profile_module_file(Profile, ProfileModuleFile)),
+  once(profile_module_file(Profile, ProfileURI)),
+  uri_file_name(ProfileURI, ProfileModuleFile),
   ensure_loaded(ProfileModuleFile),
   assertz(profile_loaded(Profile)).
 
@@ -119,6 +134,19 @@ get_document_profile(_URI, base).
 
 set_document_profile(URI, Profile) :-
   set_document_property(URI, profile(Profile)).
+
+reindex_for_profile(base).
+
+reindex_for_profile(Profile) :-
+  forall(
+    get_document_profile(URI, Profile),
+    % This is a little sketch, as we
+    % are explicitly calling to avoid circular references
+    (
+      info("Reindexing %w for profile %w",[URI, Profile]),
+      pls_index_indexing:index_text(URI)
+      )
+    ).
 
 % 
 % goals
