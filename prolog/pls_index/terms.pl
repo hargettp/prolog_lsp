@@ -49,11 +49,12 @@ process_term(URI, _SubPos, (:- use_language_profile(Profile)), _CommentPos, _Var
   profile_module(Profile, ProfileModule),
   info("Using profile %w for %w in %w",[Profile, URI, ProfileModule]),
   set_document_profile(URI, Profile),
+  ensure_profile_loaded(Profile),
   !.
 
 process_term(URI, SubPos, Term, CommentPos, Vars) :-
   get_document_profile(URI, Profile),
-  ensure_profile_loaded(Profile),
+  % ensure_profile_loaded(Profile),
   try_profile_index_term(Profile, URI, SubPos, Term),
   try_profile_index_docs(Profile, URI, SubPos, Term, CommentPos),
   try_profile_index_signature(Profile, URI, SubPos, Term, Vars),

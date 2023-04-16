@@ -26,6 +26,13 @@
 :- use_module(documents).
 
 user:file_search_path(pls_language_profile,library(pls_language_profile)).
+user:file_search_path(pls_language_profile,LocalPath) :-
+  working_directory(Cwd, Cwd),
+  absolute_file_name(pls_language_profile,LocalPath, [relative_to(Cwd)]).
+
+user:file_search_path(pls_language_profile,LocalPath) :-
+  working_directory(Cwd, Cwd),
+  absolute_file_name(prolog/pls_language_profile,LocalPath, [relative_to(Cwd)]).
 
 % 
 % Interface to profiles
@@ -89,8 +96,7 @@ register_language_profile(Profile, ProfileURI) :-
 
 register_language_profile(Profile, ProfileURI) :-
   info("Registering language profile %w in %w",[Profile, ProfileURI]),
-  assertz(registered_language_profile(Profile, ProfileURI)),
-  reindex_for_profile(Profile).
+  assertz(registered_language_profile(Profile, ProfileURI)).
 
 %! registered_language_profile(+Profile, +ProfileModuleFile) is det.
 %
@@ -148,7 +154,7 @@ reindex_for_profile(Profile) :-
       )
     ).
 
-% 
+% f
 % goals
 % 
 index_goals(URI, Caller, GoalPos, Goal) :-
@@ -156,7 +162,14 @@ index_goals(URI, Caller, GoalPos, Goal) :-
 
 index_goal(URI, Caller, GoalPos, Goal) :-
   get_document_profile(URI, Profile),
-  profile_index_goal(Profile, URI, Caller, GoalPos, Goal).
+  try_profile_index_goal(Profile, URI, Caller, GoalPos, Goal).
+
+try_profile_index_goal(Profile, URI, Caller, GoalPos, Goal) :-
+  pls_index_profiles:profile_index_goal(Profile, URI, Caller, GoalPos, Goal),
+  !.
+
+try_profile_index_goal(_Profile, URI, Caller, GoalPos, Goal) :-
+  pls_index_profiles:profile_index_goal(base, URI, Caller, GoalPos, Goal).
 
 % 
 %  -- position helpers --
