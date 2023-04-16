@@ -140,6 +140,13 @@ pls_index_profiles:profile_index_goal(base, URI, Caller, term_position(_From, _T
 
 pls_index_profiles:profile_end_of_file(base, _URI).  
 
+pls_index_profiles:profile_symbol(base, URI, Query, Range, Name, Detail, Kind) :-
+  get_document_item(URI, Range, defines(Predicate)),
+  Predicate = Name/_Arity,
+  term_string(Predicate, Detail),
+  atom_concat(Query,_,Name),
+  symbol_kind(function,Kind).
+
 %! index_declaration(+URI, +Pos, +Directive, _Caller) is det.
 %
 % Index a declaration from a directive.

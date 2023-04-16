@@ -19,7 +19,8 @@
   functor_range/4,
   term_position_range/3,
   term_range/4,
-  argument_positions/2
+  argument_positions/2,
+  symbol_kind/2
 ]).
 
 :- use_module(library(log4p)).
@@ -62,6 +63,12 @@ user:file_search_path(pls_language_profile,LocalPath) :-
 % Allow the profile to cleanup after indexing a file.
 %
 :- multifile profile_end_of_file/2.
+
+%! profile_symbol(+Profile, +URI, +Query, ?Range, ?Name, ?Detail, ?Kind) is nondet.
+%
+% Return details about a symbol in the indicated document
+%
+:- multifile profile_symbol/7.
 
 %! use_language_profile(+Profile) is det.
 %
@@ -213,3 +220,26 @@ term_range(URI, From, To, Range) :-
     }.
 
 argument_positions(term_position(_From, _To, _FFrom, _FTo, Subpos), Subpos).
+
+%! symbol_kind(+Kind, -Code) is det.
+%
+% Transalte a known symbol kind into a pre-defined code.
+%
+symbol_kind(file, 1).
+symbol_kind(module, 2).
+symbol_kind(namespace, 3).
+symbol_kind(package, 4).
+symbol_kind(class, 5).
+symbol_kind(method, 6).
+symbol_kind(property, 7).
+symbol_kind(field, 8).
+symbol_kind(constructor, 9).
+symbol_kind(enum, 10).
+symbol_kind(interface, 11).
+symbol_kind(function, 12).
+symbol_kind(variable, 13).
+symbol_kind(constant, 14).
+symbol_kind(string, 15).
+symbol_kind(number, 16).
+symbol_kind(boolean, 17).
+symbol_kind(array, 18).

@@ -11,10 +11,7 @@ workspace_symbols(Query,Symbols) :-
   findall(Symbol,workspace_symbol(Query,Symbol),Symbols).
 
 workspace_symbol(Query,Symbol) :-
-  get_document_item(URI, Range, defines(Predicate)),
-  Predicate = Name/_Arity,
-  atom_concat(Query,_,Name),
-  symbol_kind(function,Kind),
+  try_profile_symbol(URI, Query, Range, Name, _Detail, Kind),
   Symbol = symbol{
     name: Name,
     kind: Kind,
@@ -28,10 +25,7 @@ document_symbols(URI, SymbolInfos) :-
   findall(SymbolInfo, document_symbol(URI, SymbolInfo), SymbolInfos).
 
 document_symbol(URI, Symbol) :-
-  get_document_item(URI, Range, defines(Predicate)),
-  Predicate = Name/_Arity,
-  symbol_kind(function,Kind),
-  term_string(Predicate, Detail),
+  try_profile_symbol(URI, '', Range, Name, Detail, Kind),
   Symbol = symbol{
     name: Name,
     detail: Detail,
@@ -40,21 +34,10 @@ document_symbol(URI, Symbol) :-
     selectionRange: Range
     }.
 
-symbol_kind(file, 1).
-symbol_kind(module, 2).
-symbol_kind(namespace, 3).
-symbol_kind(package, 4).
-symbol_kind(class, 5).
-symbol_kind(method, 6).
-symbol_kind(property, 7).
-symbol_kind(field, 8).
-symbol_kind(constructor, 9).
-symbol_kind(enum, 10).
-symbol_kind(interface, 11).
-symbol_kind(function, 12).
-symbol_kind(variable, 13).
-symbol_kind(constant, 14).
-symbol_kind(string, 15).
-symbol_kind(number, 16).
-symbol_kind(boolean, 17).
-symbol_kind(array, 18).
+try_profile_symbol(URI, Query, Range, Name, Detail, Kind) :-
+  get_document_profile(URI, Profile),
+  Profile \= base,
+  pls_index_profiles:profile_symbol(Profile, URI, Query, Range, Name, Detail, Kind).
+
+try_profile_symbol(URI, Query, Range, Name, Detail, Kind) :-
+  pls_index_profiles:profile_symbol(base, URI, Query, Range, Name, Detail, Kind).
