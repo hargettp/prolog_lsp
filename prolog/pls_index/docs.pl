@@ -12,6 +12,8 @@
 
 :- use_module(documents).
 
+% Index raw comments for later retrieval as docs
+% 
 index_docs(URI, PredicateOrKey, Range, CommentPos) :-
   ( filter_for_docs(Range, CommentPos, DocLine, Docs)
     -> add_document_item(URI, Range, docs(PredicateOrKey, DocLine, Docs))
@@ -50,7 +52,10 @@ get_docs(Predicate, Docs) :-
   swritef(Docs, "### %w\n*No documentation available.*",[Predicate]).
 
 comment_markup(Predicate, Comment, Markup) :-
-  is_structured_comment(Comment, Prefixes),
+  ( is_structured_comment(Comment, Prefixes)
+    -> true
+    ; Prefixes = []
+    ),
   string_codes(Comment, Codes),
   indented_lines(Codes, Prefixes, Lines),
   findall(
