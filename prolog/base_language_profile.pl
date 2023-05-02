@@ -49,7 +49,8 @@ pls_index_profiles:profile_index_term(base, URI, Pos, (_Module:Head :- Body)) :-
   pls_index_profiles:profile_index_term(base, URI, Pos, (Head :- Body)).
 
 pls_index_profiles:profile_index_term(base, URI, _Pos, :- provide_language_profile(Profile) ) :-
-  register_language_profile(Profile, URI).
+  register_language_profile(Profile, URI),
+  reindex_for_profile(Profile).
 
 pls_index_profiles:profile_index_term(base, URI, Pos, :- Declaration ) :-
   Declaration =.. [Directive, Arg],

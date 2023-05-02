@@ -18,6 +18,7 @@
 :- reexport(language_client).
 :- reexport('./pls_index/documents').
 :- reexport('./pls_index/profiles').
+:- reexport('./pls_index/docs').
 
 % We load the base profile by default
 :- use_module(base_language_profile).

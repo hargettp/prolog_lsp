@@ -2,6 +2,7 @@
   use_language_profile/1,
   provide_language_profile/1,
   register_language_profile/2,
+  reindex_for_profile/1,
   profile_module/2,
   ensure_profile_loaded/1,
   get_document_profile/2,
