@@ -96,7 +96,7 @@ test(shutdown, [
     ]) :-
   call_method(Connection,initialize, _{},_),
   notify_method(Connection, initialized,_{}),
-  call_method(Connection,shutdown,_{},_),
+  call_method(Connection,shutdown,_),
   % should get an error
   expect_error(
     call_method(Connection,echo,_{},_{}), 
@@ -109,7 +109,7 @@ test(exit, [
     ]) :-
   call_method(Connection,initialize, _{},_),
   notify_method(Connection, initialized,_{}),
-  call_method(Connection,shutdown,_{},R),
+  call_method(Connection,shutdown,R),
   info('shutdown %w',[R]),
   notify_method(Connection,exit,_{}).
 

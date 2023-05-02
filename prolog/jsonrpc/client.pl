@@ -3,6 +3,7 @@
     jsonrpc_disconnect/1,
     with_connection/3,
 
+    call_method/3,
     call_method/4,
     notify_method/3,
 
@@ -34,6 +35,22 @@ call_method(Connection, Method, Params, Result) :-
   stream_pair(StreamPair,In,Out),
   uuid(Id),
   Request = _{jsonrpc: "2.0", id : Id, method: Method, params: Params},
+  write_message(Out, Request),
+  debug('Sent request: %w',[Request]),
+  flush_output(Out),
+  read_message(In, Response),
+  debug('Received response: %w', [Response]),
+  ( _ = Response.get(result) ->
+    Result = Response.result ;
+    throw(jsonrpc_error(Response.error)) ),
+  !.
+
+% Call method but with no params
+call_method(Connection, Method, Result) :-
+  connection_stream_pair(Connection,StreamPair),
+  stream_pair(StreamPair,In,Out),
+  uuid(Id),
+  Request = _{jsonrpc: "2.0", id : Id, method: Method},
   write_message(Out, Request),
   debug('Sent request: %w',[Request]),
   flush_output(Out),

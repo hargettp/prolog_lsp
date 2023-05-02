@@ -67,7 +67,7 @@ handle_notification_or_request(Server, Peer, Out, Message) :-
 
 handle_request(Server, _Peer, Out, Request) :-
   catch_with_backtrace(
-      dispatch_method(Server, Request.id, Request.method, Request.params, Response),
+      dispatch_method(Server, Request.id, Request.method, Request.get(params,_{}), Response),
       Exception,
       dispatch_exception(Server,Request,Exception,Response)),
   write_message(Out,Response),
