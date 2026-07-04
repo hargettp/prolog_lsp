@@ -8,8 +8,8 @@
 
 ]).
 
-:- use_module(library(http/json)).
-:- use_module(library(http/json_convert)).
+:- use_module(library(json)).
+:- use_module(library(json_convert)).
 :- use_module(library(socket)).
 
 :- use_module(library(log4p)).

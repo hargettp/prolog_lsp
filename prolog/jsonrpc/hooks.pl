@@ -16,7 +16,7 @@
 
 :- use_module(library(filesex)).
 :- use_module(library(log4p)).
-:- use_module(library(http/json)).
+:- use_module(library(json)).
 
 :- dynamic jsonrpc_log_directory/1.
 :- dynamic jsonrpc_log_enabled/0.

@@ -2,7 +2,7 @@
   index_terms/1
   ]).
 
-:- use_module(library(http/json)).
+:- use_module(library(json)).
 :- use_module(library(log4p)).
 :- use_module(library(prolog_stack)).
 

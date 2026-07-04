@@ -8,8 +8,8 @@
   message_json/2
   ]).
 
-:- use_module(library(http/json)).
-:- use_module(library(http/json_convert)).
+:- use_module(library(json)).
+:- use_module(library(json_convert)).
 :- use_module(library(dcg/basics)).
 :- use_module(library(prolog_stack)).
 :- use_module(library(readutil)).
