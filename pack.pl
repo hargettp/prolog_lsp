@@ -1,6 +1,6 @@
 name(prolog_lsp).
 title('Implementation of Language Server Protocol for Prolog').
-version('0.0.14').
+version('0.0.15').
 author('Phil Hargett','phil@haphazardhouse.net').
 maintainer('Phil Hargett', 'phil@haphazardhouse.net').
 packager('Phil Hargett', 'phil@haphazardhouse.net').
