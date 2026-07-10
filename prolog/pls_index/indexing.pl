@@ -55,8 +55,8 @@ begin_indexing(Params) :-
       ],
       AllRoots),
     list_to_set(AllRoots, RootURIs),
-    % start_index_roots(RootURIs).
-    index_roots(RootURIs).
+    start_index_roots(RootURIs).
+    %index_roots(RootURIs).
 
 begin_indexing(_).
 
