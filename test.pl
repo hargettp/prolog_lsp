@@ -8,4 +8,4 @@
 
 :- load_test_files(_X).
 
-:- run_tests.
+:- run_tests(_) -> halt; halt(1).

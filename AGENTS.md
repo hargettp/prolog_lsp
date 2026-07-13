@@ -59,7 +59,10 @@ The Prolog LSP server is structured in modular layers, each with distinct respon
 1.  **Prolog Idioms:** All core logic and parsing should adhere to idiomatic Prolog practices.
 2.  **AST First:** Design the system around a solid AST to decouple semantic analysis from the parsing mechanism.
 3.  **LSP Compliance:** Strictly follow the [LSP specification](https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/) for request/response formats.
-4.  **Test Coverage:** Every core component (Parser, Semantic Analyzer, Diagnostics) must have comprehensive unit tests.
+4.  **Test Coverage:** Every core component (Parser, Semantic Analyzer, Diagnostics) must have comprehensive unit tests. Run this command to execute unit tests:
+    ```bash
+    swipl -s test
+    ```
 5.  **Modularity:** Maintain a high degree of modularity so that agents can be developed, tested, and swapped out independently.
 
 ## 5. Known Knowledge Base (LLM Wiki Integration)
