@@ -34,7 +34,20 @@ teardown(Type, Connection) :-
   teardown(Type).
 
 % Helper predicates for tests
-test_file_uri('file:///tmp/test_document.pl').
+
+% Get the project root directory as an absolute file path
+project_root(ProjectRoot) :-
+  working_directory(CWD, CWD),
+  ProjectRoot = CWD.
+
+% Construct a file URI relative to the project root
+project_file_uri(RelativePath, FileURI) :-
+  project_root(ProjectRoot),
+  atomic_list_concat([ProjectRoot, '/', RelativePath], FilePath),
+  uri_file_name(FileURI, FilePath).
+
+test_file_uri(URI) :-
+  project_file_uri('prolog/methods.pl', URI).
 
 test_prolog_content('
 % Test Prolog module
@@ -55,9 +68,11 @@ helper(X, Y) :- X > Y.
 
 % Initialization params with workspace
 init_params(Params) :-
+  project_root(Root),
+  uri_file_name(RootURI, Root),
   Params = _{
     processId: 1234,
-    rootUri: 'file:///Users/phil/src/prolog_lsp',
+    rootUri: RootURI,
     capabilities: _{}
   }.
 
@@ -257,7 +272,7 @@ test(textDocument_documentSymbol, [
   notify_method(Connection, initialized, _{}),
   
   % Use an actual project file
-  ProjectFile = 'file:///Users/phil/src/prolog_lsp/prolog/methods.pl',
+  project_file_uri('prolog/methods.pl', ProjectFile),
   text_document(ProjectFile, TextDoc),
   Params = _{textDocument: TextDoc},
   call_method(Connection, 'textDocument/documentSymbol', Params, Result),
@@ -280,7 +295,7 @@ test(textDocument_hover_with_project_file, [
   sleep(0.5),
   
   % Query hover at a position in an actual project file
-  ProjectFile = 'file:///Users/phil/src/prolog_lsp/prolog/methods.pl',
+  project_file_uri('prolog/methods.pl', ProjectFile),
   text_document(ProjectFile, TextDoc),
   position(10, 5, Pos),
   Params = _{
@@ -307,7 +322,7 @@ test(textDocument_definition_with_project_file, [
   sleep(0.5),
   
   % Query definition at a position
-  ProjectFile = 'file:///Users/phil/src/prolog_lsp/prolog/methods.pl',
+  project_file_uri('prolog/methods.pl', ProjectFile),
   text_document(ProjectFile, TextDoc),
   position(10, 5, Pos),
   Params = _{
@@ -334,7 +349,7 @@ test(textDocument_references_with_project_file, [
   sleep(0.5),
   
   % Query references at a position
-  ProjectFile = 'file:///Users/phil/src/prolog_lsp/prolog/methods.pl',
+  project_file_uri('prolog/methods.pl', ProjectFile),
   text_document(ProjectFile, TextDoc),
   position(10, 5, Pos),
   Params = _{
@@ -362,7 +377,7 @@ test(textDocument_completion_with_project_file, [
   sleep(0.5),
   
   % Query completions at a position
-  ProjectFile = 'file:///Users/phil/src/prolog_lsp/prolog/methods.pl',
+  project_file_uri('prolog/methods.pl', ProjectFile),
   text_document(ProjectFile, TextDoc),
   position(10, 5, Pos),
   Params = _{
@@ -411,7 +426,7 @@ test(completion_null_result, [
   sleep(0.5),
   
   % Query completion at invalid position (far beyond document)
-  ProjectFile = 'file:///Users/phil/src/prolog_lsp/prolog/methods.pl',
+  project_file_uri('prolog/methods.pl', ProjectFile),
   text_document(ProjectFile, TextDoc),
   position(9999, 9999, Pos),  % Way beyond actual file
   Params = _{textDocument: TextDoc, position: Pos},
@@ -431,7 +446,7 @@ test(multiple_language_features_same_file, [
   notify_method(Connection, initialized, _{}),
   sleep(0.5),
   
-  ProjectFile = 'file:///Users/phil/src/prolog_lsp/prolog/methods.pl',
+  project_file_uri('prolog/methods.pl', ProjectFile),
   text_document(ProjectFile, TextDoc),
   position(10, 5, Pos1),
   position(20, 0, Pos2),
@@ -481,7 +496,7 @@ test(language_feature_on_unopened_file, [
   sleep(0.5),
   
   % Query symbols on a file that exists but was never opened
-  UnindexedFile = 'file:///Users/phil/src/prolog_lsp/prolog/language_server.pl',
+  project_file_uri('prolog/language_server.pl', UnindexedFile),
   text_document(UnindexedFile, TextDoc),
   Params = _{textDocument: TextDoc},
   call_method(Connection, 'textDocument/documentSymbol', Params, Result),
