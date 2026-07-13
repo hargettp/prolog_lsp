@@ -25,7 +25,8 @@
 
 handle_connection(ServerName, Peer, StreamPair) :-
   mark_server_as_running(ServerName),
-  handle_messages(ServerName, Peer, StreamPair).
+  handle_messages(ServerName, Peer, StreamPair),
+  info("Stopping connection %s for %s", [Peer, ServerName]).
 
 handle_messages(ServerName, _Peer, _StreamPair) :-
   \+ is_server_running(ServerName), 
@@ -35,7 +36,7 @@ handle_messages(ServerName, _Peer, _StreamPair) :-
 handle_messages(ServerName, Peer, StreamPair) :-
   debug('handling connection for %w at %w',[Peer, ServerName]),
   stream_pair(StreamPair,In,Out),
-  ( read_message(In, Message) ->
+  ignore( read_message(In, Message) ->
     ( 
       handle_message(ServerName, Peer,Out,Message)
      ) ;

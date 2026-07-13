@@ -14,6 +14,7 @@
 :- use_module(symbols).
 :- use_module(errors).
 :- use_module(methods).
+:- reexport(logs).
 :- reexport(language_server).
 :- reexport(language_client).
 :- reexport('./pls_index/documents').
