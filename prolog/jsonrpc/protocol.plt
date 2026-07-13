@@ -79,6 +79,62 @@ with_input_from(String, Module:Goal) :-
       jsonrpc_protocol:read_message(_Msg)
       ).
 
+  % Demonstrate try_read_from flexibility: read_message succeeds
+  % regardless of header order or content-type presence
+
+  test(read_message_content_length_first) :-
+    % Content-Length header before Content-Type
+    atom_json_dict(Content, _{ jsonrpc: "2.0", method: test1, params: _{a: 1} }, []),
+    string_length(Content, Size),
+    with_output_to(
+      string(Payload),
+      (
+        format("Content-Length: ~w\r\n", [Size]),
+        format("Content-Type: application/vnd.api+json; charset=utf-8\r\n"),
+        format("\r\n"),
+        format("~s", Content)
+        )
+      ),
+    with_input_from(
+      Payload,
+      jsonrpc_protocol:read_message(_Msg)
+      ).
+
+  test(read_message_content_type_first) :-
+    % Content-Type header before Content-Length (reverse order)
+    atom_json_dict(Content, _{ jsonrpc: "2.0", method: test2, params: _{b: 2} }, []),
+    string_length(Content, Size),
+    with_output_to(
+      string(Payload),
+      (
+        format("Content-Type: application/vnd.api+json; charset=utf-8\r\n"),
+        format("Content-Length: ~w\r\n", [Size]),
+        format("\r\n"),
+        format("~s", Content)
+        )
+      ),
+    with_input_from(
+      Payload,
+      jsonrpc_protocol:read_message(_Msg)
+      ).
+
+  test(read_message_no_content_type) :-
+    % Content-Type header is optional
+    atom_json_dict(Content, _{ jsonrpc: "2.0", method: test3, params: _{c: 3} }, []),
+    string_length(Content, Size),
+    with_output_to(
+      string(Payload),
+      (
+        format("Content-Length: ~w\r\n", [Size]),
+        format("\r\n"),
+        format("~s", Content)
+        )
+      ),
+    with_input_from(
+      Payload,
+      jsonrpc_protocol:read_message(_Msg)
+      ).
+
   test(write_read_message) :-
     Msg = _{jsonrpc: "2.0", foo: 1, bar: "baz"},
     with_output_to(
