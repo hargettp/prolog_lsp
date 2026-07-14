@@ -45,8 +45,7 @@ message_json(Message, Json) :-
   atom_json_dict(Json, Message, []).
 
 write_message(Out,Message) :-
-  with_output_to(Out,write_message(Message)),
-  flush_output(Out).
+  with_output_to(Out,write_message(Message)).
 
 write_message(Message) :-
   message_json(Message, Content),

@@ -36,18 +36,12 @@ handle_messages(ServerName, _Peer, _StreamPair) :-
 handle_messages(ServerName, Peer, StreamPair) :-
   debug('handling connection for %w at %w',[Peer, ServerName]),
   stream_pair(StreamPair,In,Out),
-  (
-    read_message(In, Message)
-    -> (
-         ignore(handle_message(ServerName, Peer, Out, Message)),
-         handle_messages(ServerName, Peer, StreamPair)
-       )
-    ;  (
-         at_end_of_stream(In)
-         -> debug('End of stream reached for %w', [Peer])
-         ;  (parse_error(Out), handle_messages(ServerName, Peer, StreamPair))
-       )
-  ).
+  ignore( read_message(In, Message) ->
+    ( 
+      handle_message(ServerName, Peer,Out,Message)
+     ) ;
+    parse_error(Out) ),
+    handle_messages(ServerName, Peer,StreamPair).
 
 handle_message(_, _Peer, Out, Message) :-  
   message_json(Message, Json),
