@@ -150,6 +150,7 @@ pls_text_document_did_close(_Server, Params) :-
 pls_document_document_symbol(_Server, Params, Result) :-
   Document = Params.textDocument,
   URI = Document.uri,
+  debug("Looking in %w for symbols"),
   document_symbols(URI, Result).
 
 pls_text_document_hover(_Server, Params, Result) :-

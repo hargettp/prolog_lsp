@@ -22,7 +22,7 @@ with_input_from(String, Module:Goal) :-
   test(read_any_content_type) :-
     with_input_from(
       "Content-Type: something/somehow\r\n",
-      jsonrpc_protocol:read_content_length(0)
+      jsonrpc_protocol:read_content_type
       ).
 
   test(read_header1) :-

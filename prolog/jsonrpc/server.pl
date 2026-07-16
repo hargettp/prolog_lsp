@@ -24,6 +24,7 @@
 :- dynamic jsonrpc_connection/4.
 
 handle_connection(ServerName, Peer, StreamPair) :-
+  debug('handling connection for %w at %w',[Peer, ServerName]),
   mark_server_as_running(ServerName),
   handle_messages(ServerName, Peer, StreamPair),
   info("Stopping connection %s for %s", [Peer, ServerName]).
@@ -34,7 +35,6 @@ handle_messages(ServerName, _Peer, _StreamPair) :-
   !.
   
 handle_messages(ServerName, Peer, StreamPair) :-
-  debug('handling connection for %w at %w',[Peer, ServerName]),
   stream_pair(StreamPair,In,Out),
   ignore( read_message(In, Message) ->
     ( 
@@ -48,12 +48,14 @@ handle_message(_, _Peer, Out, Message) :-
   debug('handlng message %w',[Json]),
   Message.get(jsonrpc) = "2.0" ->
     fail ;
-    invalid_request(Out).
+    (invalid_request(Out), !).
 
 handle_message(Server, Peer,Out,Message) :-
-  is_list(Message)
+  (is_list(Message)
     -> handle_batch(Server, Peer, Out, Message)
-    ; handle_notification_or_request(Server, Peer, Out, Message).
+    ; handle_notification_or_request(Server, Peer, Out, Message)), !.
+    
+handle_message(_,_,_,_).
 
 handle_batch(Server, Peer,Out,[Message|Rest]) :-
   handle_notification_or_request(Server, Peer, Out, Message),

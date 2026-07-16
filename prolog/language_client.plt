@@ -504,7 +504,8 @@ test(multiple_language_features_same_file, [
   % All should complete without error
   (Result1 = null ; is_dict(Result1)),
   (Result2 = null ; is_list(Result2)),
-  (Result3 = null ; is_list(Result3)).
+  (Result3 = null ; is_list(Result3)),
+  !.
 
 test(workspace_symbol_empty_query, [
     forall(member(Type, [stdio])), 

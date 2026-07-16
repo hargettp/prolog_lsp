@@ -58,12 +58,13 @@ write_message(Message) :-
   
 read_blank_line(In) :-
   read_line_to_codes(In,Codes),
+  Codes \== end_of_file,
   phrase(blank_line,Codes,[]).
 
 try_read_from(In, Goal) :-
   stream_property(In, position(Pos)), 
   catch(
-    ( Goal -> true ; set_stream_position(In, Pos) ),
+    ( Goal -> true ; ( set_stream_position(In, Pos), fail ) ),
     Any,
     ( set_stream_position(In, Pos), throw(Any) )
     ).
@@ -81,8 +82,7 @@ read_header(In, Size) :-
     In,
     (
       read_content_type,
-      read_content_length(Size),
-      read_blank_line
+      read_content_length(Size)
       )
     ),
   !.
@@ -106,33 +106,22 @@ read_header(In, Size) :-
 
 read_content_type :-
   current_input(In),
-  try_read_from(
-    In,
-    (
-      read_line_to_codes(In, Line),
-      phrase(content_type, Line)
-      )
-    ).
+  read_line_to_codes(In, Line),
+  Line \== end_of_file,
+  phrase(content_type, Line).
 
 read_content_length(Size) :-
   current_input(In),
-  try_read_from(
-    In,
-    (
-      read_line_to_codes(In, Line),
-      phrase(content_length(Size), Line)
-      )
-    ).
+  read_line_to_codes(In, Line),
+  Line \== end_of_file,
+  phrase(content_length(Size), Line).
 
 write_content_length(Size) :-
   format("Content-Length: ~w\r\n",[Size]).
 
 read_blank_line :-
   current_input(In),
-  try_read_from(
-    In,
-    read_string(In, 2, "\r\n")
-    ).
+  read_blank_line(In).
 
 write_blank_line :-
   format("\r\n").
