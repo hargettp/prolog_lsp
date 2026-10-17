@@ -32,7 +32,6 @@ read_message(Message) :-
   catch(
     (
       read_header(Size),
-      read_blank_line,
       read_content(Size, Content),
       message_json(Message, Content)
       ),
@@ -47,7 +46,8 @@ message_json(Message, Json) :-
 write_message(Out,Message) :-
   with_output_to(Out,write_message(Message)).
 
-write_message(Message) :-
+write_message(Message0) :-
+  ensure_jsonrpc_version(Message0, Message),
   message_json(Message, Content),
   string_length(Content, Size),
   write_content_length(Size),
@@ -56,53 +56,42 @@ write_message(Message) :-
   flush_output,
   ignore(call_write_message_hooks(Message)).
   
+%  JSON-RPC 2.0 requires every message to carry "jsonrpc":"2.0"; strict
+%  clients (e.g. Fresh) reject responses without it.
+ensure_jsonrpc_version(Message0, Message) :-
+  is_dict(Message0),
+  \+ get_dict(jsonrpc, Message0, _),
+  !,
+  put_dict(jsonrpc, Message0, "2.0", Message).
+ensure_jsonrpc_version(Message, Message).
+
 read_blank_line(In) :-
   read_line_to_codes(In,Codes),
   Codes \== end_of_file,
   phrase(blank_line,Codes,[]).
 
-try_read_from(In, Goal) :-
-  stream_property(In, position(Pos)), 
-  catch(
-    ( Goal -> true ; ( set_stream_position(In, Pos), fail ) ),
-    Any,
-    ( set_stream_position(In, Pos), throw(Any) )
-    ).
-
-try_read(Goal) :-
-  current_input(In),
-  try_read_from(In, Goal).
-
+%  Headers are read strictly forward, one line at a time: input may be
+%  a pipe (stdio), which cannot seek, so we must never rewind.
+%  Header lines are consumed through the terminating blank line (or EOF).
+%  Content-Type (and any other header) is ignored; Content-Length is required.
 read_header(Size) :-
   current_input(In),
   read_header(In, Size).
 
 read_header(In, Size) :-
-  try_read_from(
-    In,
-    (
-      read_content_type,
-      read_content_length(Size)
-      )
-    ),
-  !.
+  read_header_lines(In, none, MaybeSize),
+  MaybeSize = size(Size).
 
-read_header(In, Size) :-
-  try_read_from(
-    In,
-    (
-      read_content_length(Size),
-      read_content_type
-      )
-    ),
-  !.
-
-read_header(In, Size) :-
-  try_read_from(
-    In,
-    read_content_length(Size)
-    ),
-  !.
+read_header_lines(In, Acc, Size) :-
+  read_line_to_codes(In, Line),
+  (  Line == end_of_file
+  -> Size = Acc
+  ;  phrase(blank_line, Line)
+  -> Size = Acc
+  ;  phrase(content_length(S), Line, _)
+  -> read_header_lines(In, size(S), Size)
+  ;  read_header_lines(In, Acc, Size)
+  ).
 
 read_content_type :-
   current_input(In),

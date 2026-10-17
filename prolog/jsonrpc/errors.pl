@@ -29,7 +29,7 @@ dispatch_exception(Server, Message, Exception, Response) :-
     -> true
     ; unknown_error(Server, Exception, Error)
     ),
-  BaseResponse = _{error: Error},
+  BaseResponse = _{id: null, error: Error},
   (Id = Message.get(id) ->
     Response = BaseResponse.put(id,Id) ;
     Response = BaseResponse).
@@ -68,10 +68,10 @@ unknown_error(_Server, Exception, Error) :-
 
 parse_error(Out) :-
   Error = _{code: -32700, message: "Parse error" },
-  Response = _{error: Error},
+  Response = _{id: null, error: Error},
   write_message(Out, Response).
 
 invalid_request(Out) :-
   Error = _{code: -32600, message: "Invalid Request" },
-  Response = _{error: Error},
+  Response = _{id: null, error: Error},
   write_message(Out, Response).

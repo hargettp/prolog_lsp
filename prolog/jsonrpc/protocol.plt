@@ -153,4 +153,18 @@ with_input_from(String, Module:Goal) :-
   %     ).
 
     
+  % stdin in stdio mode is a pipe, which cannot seek
+  test(read_messages_from_pipe) :-
+    pipe(Rd, Wr),
+    forall(between(1, 50, N),
+      ( atom_json_dict(C, _{jsonrpc: "2.0", method: m, params: _{n: N}}, []),
+        string_length(C, Sz),
+        format(Wr, "Content-Length: ~w\r\n\r\n~s", [Sz, C]) )),
+    close(Wr),
+    forall(between(1, 50, N),
+      ( read_message(Rd, M), M.params.n == N )),
+    \+ read_message(Rd, _),
+    at_end_of_stream(Rd),
+    close(Rd).
+
 :- end_tests(protocol).
